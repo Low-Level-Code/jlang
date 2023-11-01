@@ -1,13 +1,16 @@
+package scanner;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import main.JLang;
 import tokenizer.Token;
 import tokenizer.TokenType;
 
 import static tokenizer.TokenType.*;
 
-class Scanner {
+public class Scanner {
     private final String source;
     private final List < Token > tokens = new ArrayList < > ();
     private int start = 0;
@@ -35,7 +38,7 @@ class Scanner {
     }
 
 
-    Scanner(String source) {
+    public Scanner(String source) {
         this.source = source;
     }
     private boolean isAtEnd() {
@@ -160,7 +163,7 @@ class Scanner {
         }
     }
 
-    List < Token > scanTokens() {
+    public List < Token > scanTokens() {
         while (!isAtEnd()) {
             // We are at the beginning of the next lexeme.
             start = current;

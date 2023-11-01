@@ -1,9 +1,11 @@
 package ast;
 
+import ast.Expr.Block;
+import ast.Expr.Comma;
 import tokenizer.Token;
 import tokenizer.TokenType;
 
-class AstPrinter implements Expr.Visitor<String> {
+public class AstPrinter implements Expr.Visitor<String> {
     private String parenthesize(String name, Expr... exprs) {
         StringBuilder builder = new StringBuilder();
         builder.append("(").append(name);
@@ -15,7 +17,7 @@ class AstPrinter implements Expr.Visitor<String> {
         return builder.toString();
     }
         
-    String print(Expr expr) {
+    public String print(Expr expr) {
         return expr.accept(this);
     }
     @Override
@@ -35,6 +37,23 @@ class AstPrinter implements Expr.Visitor<String> {
     public String visitUnaryExpr(Expr.Unary expr) {
         return parenthesize(expr.operator.lexeme, expr.right);
     }
+    @Override
+    public String visitBlockExpr(Block expr) {
+        String rv = "";
+        rv += "block {\n";
+        for (Expr statement : expr.statements) {
+            rv += statement.accept(this);
+        }
+        rv += "\n}\n";
+        // TODO Auto-generated method stub
+        return rv;
+    }
+
+    @Override
+    public String visitCommaExpr(Comma expr) {
+        // TODO Auto-generated method stub
+        return parenthesize("comma", expr.left, expr.right);
+    }
     public static void main(String[] args) {
         Expr expression = new Expr.Binary(
                             new Expr.Unary(
@@ -48,4 +67,5 @@ class AstPrinter implements Expr.Visitor<String> {
                           );
         System.out.println(new AstPrinter().print(expression));
     }
+
 }
