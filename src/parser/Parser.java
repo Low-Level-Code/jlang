@@ -63,7 +63,7 @@ public class Parser {
     }
 
     private Expr primary() {
-        if (match(LEFT_BRACE)) return block();
+        if (match(LEFT_BRACE)) return block(); // Block implementation
         if (match(FALSE)) return new Expr.Literal(false);
         if (match(TRUE)) return new Expr.Literal(true);
         if (match(NIL)) return new Expr.Literal(null);
@@ -77,7 +77,7 @@ public class Parser {
         }
         throw error(peek(), "Expect expression.");
     }
-
+ 
     private Expr block() {
         List<Expr> statements = new ArrayList<>();
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
@@ -138,12 +138,27 @@ public class Parser {
     }
         
     private Expr expression() {
-        Expr expr = equality();
-        // attempt to read all the expressions seperated by commas
+        // support for comma seperated statements
+        return comma();
+    }
+
+    private Expr comma() {
+        Expr expr = ternary();
         while (match(COMMA)) {
             Token operator = previous();
-            Expr right = equality();
+            Expr right = ternary();
             expr = new Expr.Comma(expr, right);
+        }
+        return expr;
+    }
+
+    private Expr ternary() {
+        Expr expr = equality();
+        if (match(QUESTION_MARK)) {
+            Expr thenExpr = expression(); // or equality(), depending on what you want to allow
+            consume(COLON, "Expect ':' after expression in ternary operation.");
+            Expr elseExpr = ternary();
+            expr = new Expr.Ternary(expr, thenExpr, elseExpr);
         }
         return expr;
     }

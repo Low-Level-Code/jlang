@@ -11,6 +11,7 @@ public abstract class Expr {
 		R visitUnaryExpr(Unary expr);
 		R visitBlockExpr(Block expr);
 		R visitCommaExpr(Comma expr);
+		R visitTernaryExpr(Ternary expr);
 	}
 	public static class Binary extends Expr {
 		public Binary(Expr left, Token operator, Expr right) {
@@ -91,6 +92,22 @@ public abstract class Expr {
 
 		final Expr left;
 		final Expr right;
+	}
+	public static class Ternary extends Expr {
+		public Ternary(Expr condition, Expr thenExpr, Expr elseExpr) {
+			this.condition = condition;
+			this.thenExpr = thenExpr;
+			this.elseExpr = elseExpr;
+		}
+
+		@Override
+		<R> R accept(Visitor<R> visitor) {
+			return visitor.visitTernaryExpr(this);
+		}
+
+		final Expr condition;
+		final Expr thenExpr;
+		final Expr elseExpr;
 	}
 
 	abstract <R> R accept(Visitor<R> visitor);

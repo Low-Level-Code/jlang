@@ -129,6 +129,8 @@ public class Scanner {
             case ';':addToken(SEMICOLON);break;
             case '*':addToken(STAR);break;
             case '!':addToken(match('=') ? BANG_EQUAL : BANG);break;
+            case '?':addToken(QUESTION_MARK);break; // fot the tenary operation
+            case ':':addToken(COLON);break; // fot the tenary operation
             case '=':addToken(match('=') ? EQUAL_EQUAL : EQUAL);break;
             case '<':addToken(match('=') ? LESS_EQUAL : LESS);break;
             case '>':addToken(match('=') ? GREATER_EQUAL : GREATER);break;

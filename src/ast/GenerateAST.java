@@ -79,7 +79,8 @@ public class GenerateAST {
             "Literal : Object value",
             "Unary : Token operator, Expr right",
             "Block : List<Expr> statements",
-            "Comma : Expr left, Expr right"
+            "Comma : Expr left, Expr right",
+            "Ternary : Expr condition, Expr thenExpr, Expr elseExpr"
         ));
 
     }

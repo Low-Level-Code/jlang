@@ -2,6 +2,7 @@ package ast;
 
 import ast.Expr.Block;
 import ast.Expr.Comma;
+import ast.Expr.Ternary;
 import tokenizer.Token;
 import tokenizer.TokenType;
 
@@ -45,15 +46,20 @@ public class AstPrinter implements Expr.Visitor<String> {
             rv += statement.accept(this);
         }
         rv += "\n}\n";
-        // TODO Auto-generated method stub
         return rv;
     }
 
     @Override
     public String visitCommaExpr(Comma expr) {
-        // TODO Auto-generated method stub
         return parenthesize("comma", expr.left, expr.right);
     }
+
+    
+    @Override
+    public String visitTernaryExpr(Ternary expr) {
+        return "tenary( "+expr.condition.accept(this)+" ){ "+ expr.thenExpr.accept(this)+" else "+expr.elseExpr.accept(this)+" }";
+    }
+
     public static void main(String[] args) {
         Expr expression = new Expr.Binary(
                             new Expr.Unary(
@@ -67,5 +73,6 @@ public class AstPrinter implements Expr.Visitor<String> {
                           );
         System.out.println(new AstPrinter().print(expression));
     }
+
 
 }
