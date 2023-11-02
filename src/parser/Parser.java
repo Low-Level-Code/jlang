@@ -6,6 +6,7 @@ import java.util.List;
 
 import ast.Expr;
 import ast.Stmt;
+import ast.Stmt.Catch;
 import main.JLang;
 
 import static tokenizer.TokenType.*;
@@ -311,9 +312,26 @@ public class Parser {
         consume(SEMICOLON, "Expect ';' after 'break'.");
         return new Stmt.Continue(keyword);
     } 
+    private Stmt tryCatchStatement() {
+        Stmt tryBlock = statement();
+    
+        List<Catch> catchBlocks = new ArrayList<>();
+        while (match(CATCH)) {
+            consume(LEFT_PAREN, "Expect '(' after 'catch'.");
+            Token exceptionType = consume(IDENTIFIER, "Expect exception type.");
+            Token variable = consume(IDENTIFIER, "Expect exception variable name.");
+            consume(RIGHT_PAREN, "Expect ')' after catch arguments.");
+            Stmt catchBlock = statement();
+            catchBlocks.add(new Stmt.Catch(exceptionType, variable, catchBlock));
+        }
+    
+        return new Stmt.TryCatch(tryBlock, catchBlocks);
+    }
+
     private Stmt statement() {
+        if (match(TRY)) return tryCatchStatement(); // break statement yaaay
         if (match(BREAK)) return breakStatement(); // break statement yaaay
-        if (match(CONTINUE)) return continueStatement(); // continue
+        if (match(CONTINUE)) return continueStatement(); // continue still has an embarrassing bug
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
         if (match(WHILE)) return whileStatement();

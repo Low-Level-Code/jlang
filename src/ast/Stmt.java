@@ -13,6 +13,8 @@ public abstract class Stmt {
 		R visitWhileStmt(While stmt);
 		R visitBreakStmt(Break stmt);
 		R visitContinueStmt(Continue stmt);
+		R visitTryCatchStmt(TryCatch stmt);
+		R visitCatchStmt(Catch stmt);
 	}
 	public static class Block extends Stmt {
 		public Block(List<Stmt> statements) {
@@ -117,6 +119,36 @@ public abstract class Stmt {
 		}
 
 		public final Token keyword;
+	}
+	public static class TryCatch extends Stmt {
+		public TryCatch(Stmt tryBlock, List<Catch> catchBlocks) {
+			this.tryBlock = tryBlock;
+			this.catchBlocks = catchBlocks;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitTryCatchStmt(this);
+		}
+
+		public final Stmt tryBlock;
+		public final List<Catch> catchBlocks;
+	}
+	public static class Catch extends Stmt {
+		public Catch(Token exceptionType, Token variable, Stmt block) {
+			this.exceptionType = exceptionType;
+			this.variable = variable;
+			this.block = block;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitCatchStmt(this);
+		}
+
+		public final Token exceptionType;
+		public final Token variable;
+		public final Stmt block;
 	}
 
 	public abstract <R> R accept(Visitor<R> visitor);

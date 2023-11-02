@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import interpreter.errors.RuntimeError;
+import interpreter.errors.UndefinedVariableException;
 import tokenizer.Token;
 
 public class Environment {
@@ -24,7 +25,7 @@ public class Environment {
         }
         if (enclosing != null) return enclosing.get(name);
 
-        throw new RuntimeError(name,
+        throw new UndefinedVariableException(name,
                 "Undefined variable '" + name.lexeme + "'.");
     }
 
@@ -42,7 +43,7 @@ public class Environment {
             return;
         }
         
-        throw new RuntimeError(name,
+        throw new UndefinedVariableException(name,
         "Undefined variable '" + name.lexeme + "'.");
     }
         

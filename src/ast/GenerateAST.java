@@ -92,7 +92,10 @@ public class GenerateAST {
             "Var : Token name, Expr initializer",
             "While : Expr condition, Stmt body",
             "Break : Token keyword",
-            "Continue : Token keyword"
+            "Continue : Token keyword",
+            "TryCatch : Stmt tryBlock, List<Catch> catchBlocks",
+            "Catch : Token exceptionType, Token variable, Stmt block"
+
 
         ));
 

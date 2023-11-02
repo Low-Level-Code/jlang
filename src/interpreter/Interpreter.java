@@ -6,6 +6,7 @@ import ast.Expr;
 import ast.Expr.Block;
 import ast.Expr.Comma;
 import ast.Stmt;
+import ast.Stmt.Catch;
 import ast.Stmt.Print;
 import enivirement.Environment;
 import interpreter.errors.BreakException;
@@ -238,6 +239,24 @@ public class Interpreter implements Expr.Visitor<Object>,
             throw new RuntimeError(stmt.keyword, "Continue statement must be inside a loop.");
         }
         throw new ContinueException();
+    }
+    @Override
+    public Void visitTryCatchStmt(Stmt.TryCatch stmt) {
+        try {
+            execute(stmt.tryBlock);
+        } catch (RuntimeException ex) {
+            for (Catch catchBlock : stmt.catchBlocks) {
+                if (ex.getClass().getSimpleName().equals(catchBlock.exceptionType.lexeme)) {
+                    // Define the exception in the local environment
+                    // and execute the catch block
+                    environment.define(catchBlock.variable.lexeme, ex);
+                    execute(catchBlock.block);
+                    return null; // Exit after the first matching catch block
+                }
+            }
+            throw ex; // Rethrow the exception if no matching catch block is found
+        }
+        return null;
     }
     void executeBlock(List<Stmt> statements,
         Environment environment) {

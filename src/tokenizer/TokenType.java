@@ -11,6 +11,8 @@ public enum TokenType {
     LESS, LESS_EQUAL,
     // Literals.
     IDENTIFIER, STRING, NUMBER,
+    // Errors
+    TRY, CATCH,
     // Keywords.
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
     PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE, BREAK, CONTINUE,
