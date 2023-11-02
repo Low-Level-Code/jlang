@@ -2,19 +2,20 @@ package interpreter.callable;
 
 import java.util.List;
 
+import ast.Expr;
 import ast.Stmt;
 import ast.Stmt.Return;
 import enivirement.Environment;
 import interpreter.Interpreter;
 import interpreter.exceptions.ReturnException;
 
-public class JLangFunction implements JLangCallable{
+public class JLangAnonymousFunction implements JLangCallable{
     
-    private final Stmt.Function declaration;
+    private final Expr.LambdaFunction declaration;
     private final Environment closure;
 
 
-    public JLangFunction(Stmt.Function declaration, Environment closure) {
+    public JLangAnonymousFunction(Expr.LambdaFunction declaration, Environment closure) {
         this.declaration = declaration;
         this.closure = closure;
     }
@@ -24,7 +25,7 @@ public class JLangFunction implements JLangCallable{
     }
     @Override
     public String toString() {
-        return "<fn " + declaration.name.lexeme + ">";
+        return "<fn anonymous >";
     }
 
     @Override

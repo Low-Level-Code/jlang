@@ -1,14 +1,47 @@
-fun fib(n) {
-    if (n <= 1) return n;
-    return fib(n - 2) + fib(n - 1);
-}
-fun benchmark(){
-    var c = clock();
-    for (var i = 0; i < 20; i = i + 1) {
-        print fib(i);
+fun makeCounter() {
+    var i = 0;
+    fun count() {
+        i = i + 1;
+        print i;
     }
-    shw(clock() - c);
+    return count;
 }
+var counter = makeCounter();
+counter(); // "1".
+counter(); // "2".
 
-benchmark();
 
+fun thrice(fn) {
+    for (var i = 1; i <= 3; i = i + 1) {
+    fn(i);
+    }
+    }
+    thrice(fun (a) {
+    print a;
+    });
+    // "1".
+    // "2".
+    // "3".
+    
+var fuck = fun (a){ 
+    print "fuck "+a;
+};
+fuck("sex");
+shw(type(fuck));
+
+const f1 = fun (x) {
+    return x * x;
+};
+shw(f1(2));
+
+const f2 = fun (a, b){
+    return a * b;
+};
+shw(f2(5, 5));
+
+var factor = 10;
+const f3 = fun (x){ return x * factor; };
+shw(f3(5));
+
+var f4 = fun(){ return fun(y){ return y + 1; }; };
+shw(f4()(2));

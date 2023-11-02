@@ -81,7 +81,10 @@ public class GenerateAST {
             "Block : List<Expr> statements",
             "Comma : Expr left, Expr right",
             "Ternary : Expr condition, Expr thenExpr, Expr elseExpr",
-            "Variable : Token name"
+            "Variable : Token name",
+            "LambdaFunction : Token name, List<Token> params," +
+                                    " List<Stmt> body"
+
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(

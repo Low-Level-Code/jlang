@@ -16,6 +16,7 @@ public abstract class Expr {
 		R visitCommaExpr(Comma expr);
 		R visitTernaryExpr(Ternary expr);
 		R visitVariableExpr(Variable expr);
+		R visitLambdaFunctionExpr(LambdaFunction expr);
 	}
 	public static class Assign extends Expr {
 		public Assign(Token name, Expr value) {
@@ -170,6 +171,22 @@ public abstract class Expr {
 		}
 
 		public final Token name;
+	}
+	public static class LambdaFunction extends Expr {
+		public LambdaFunction(Token name, List<Token> params, List<Stmt> body) {
+			this.name = name;
+			this.params = params;
+			this.body = body;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitLambdaFunctionExpr(this);
+		}
+
+		public final Token name;
+		public final List<Token> params;
+		public final List<Stmt> body;
 	}
 
 	public abstract <R> R accept(Visitor<R> visitor);

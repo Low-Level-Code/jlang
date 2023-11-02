@@ -23,6 +23,7 @@ import interpreter.builtins.methods.RoundFunc;
 import interpreter.builtins.methods.SqrtFunc;
 import interpreter.builtins.methods.SumFunc;
 import interpreter.builtins.methods.TypeOfFunc;
+import interpreter.callable.JLangAnonymousFunction;
 import interpreter.callable.JLangCallable;
 import interpreter.callable.JLangFunction;
 import interpreter.errors.DivisionByZeroException;
@@ -330,7 +331,7 @@ public class Interpreter implements Expr.Visitor<Object>,
     }
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        JLangFunction function = new JLangFunction(stmt);
+        JLangFunction function = new JLangFunction(stmt, environment);
         environment.define(stmt.name.lexeme, function);
         return null;
     }
@@ -340,6 +341,12 @@ public class Interpreter implements Expr.Visitor<Object>,
         Object value = null;
         if (stmt.value != null) value = evaluate(stmt.value);
         throw new ReturnException(value);
+    }
+    @Override
+    public Object visitLambdaFunctionExpr(Expr.LambdaFunction expr) {
+        // Create a new function object, capturing the current environment
+        JLangAnonymousFunction function = new JLangAnonymousFunction(expr , environment);
+        return function;
     }
 
 

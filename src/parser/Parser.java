@@ -68,6 +68,9 @@ public class Parser {
 
     private Expr primary() {
         // if (match(LEFT_BRACE)) return block(); // Block implementation
+        if (match(FUN)) {
+            return lambdafunction("function");
+        }
         if (match(FALSE)) return new Expr.Literal(false);
         if (match(TRUE)) return new Expr.Literal(true);
         if (match(NIL)) return new Expr.Literal(null);
@@ -84,17 +87,7 @@ public class Parser {
         }
         throw error(peek(), "Expect expression.");
     }
- 
-    // private Expr block() {
-    //     List<Expr> statements = new ArrayList<>();
-    //     while (!check(RIGHT_BRACE) && !isAtEnd()) {
-    //         statements.add(expression());
-    //         // Consume semicolons or other delimiters as needed
-    //     }
-    //     consume(RIGHT_BRACE, "Expect '}' after block.");
-    //     return new Expr.Block(statements);
-    // }
-    
+  
 
     private Expr finishCall(Expr callee) {
         List<Expr> arguments = new ArrayList<>();
@@ -397,6 +390,24 @@ public class Parser {
         }
         consume(SEMICOLON, "Expect ';' after constant declaration.");
         return new Stmt.Const(name, initializer);
+    }
+
+    private Expr.LambdaFunction lambdafunction(String kind) {
+        consume(LEFT_PAREN, "Expect '(' after " + kind + ".");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= FUNC_ARG_LIMIT) {
+                    error(peek(), "Can't have more than " + FUNC_ARG_LIMIT + " parameters.");
+                }
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+            } while (match(COMMA));
+        }
+        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+    
+        consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        List<Stmt> body = block();
+        return new Expr.LambdaFunction(new Token(TokenType.FUN, "anonymous",null, 0), parameters, body);
     }
 
     private Stmt.Function function(String kind) {
