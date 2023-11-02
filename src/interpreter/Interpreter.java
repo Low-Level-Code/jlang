@@ -11,6 +11,7 @@ import ast.Stmt.Print;
 import enivirement.Environment;
 import interpreter.errors.BreakException;
 import interpreter.errors.ContinueException;
+import interpreter.errors.DivisionByZeroException;
 import interpreter.errors.RuntimeError;
 import main.JLang;
 import tokenizer.Token;
@@ -88,7 +89,7 @@ public class Interpreter implements Expr.Visitor<Object>,
             case SLASH:
                 checkNumberOperands(expr.operator, left, right);
                 if ((double) right == 0.0) {
-                    throw new RuntimeError(expr.operator, "Division by zero.");
+                    throw new DivisionByZeroException(expr.operator, "Division by zero.");
                 }
                 return (double)left / (double)right;
             case STAR:
@@ -168,6 +169,15 @@ public class Interpreter implements Expr.Visitor<Object>,
             value = evaluate(stmt.initializer);
         }
         environment.define(stmt.name.lexeme, value);
+        return null;
+    }
+    @Override
+    public Void visitConstStmt(Stmt.Const stmt) {
+        Object value = null;
+        if (stmt.initializer != null) {
+            value = evaluate(stmt.initializer);
+        }
+        environment.defineConst(stmt.name.lexeme, value);
         return null;
     }
     @Override

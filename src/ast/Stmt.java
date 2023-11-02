@@ -10,6 +10,7 @@ public abstract class Stmt {
 		R visitIfStmt(If stmt);
 		R visitPrintStmt(Print stmt);
 		R visitVarStmt(Var stmt);
+		R visitConstStmt(Const stmt);
 		R visitWhileStmt(While stmt);
 		R visitBreakStmt(Break stmt);
 		R visitContinueStmt(Continue stmt);
@@ -77,6 +78,20 @@ public abstract class Stmt {
 		@Override
 		public <R> R accept(Visitor<R> visitor) {
 			return visitor.visitVarStmt(this);
+		}
+
+		public final Token name;
+		public final Expr initializer;
+	}
+	public static class Const extends Stmt {
+		public Const(Token name, Expr initializer) {
+			this.name = name;
+			this.initializer = initializer;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitConstStmt(this);
 		}
 
 		public final Token name;

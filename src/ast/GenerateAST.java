@@ -90,6 +90,7 @@ public class GenerateAST {
                                 " Stmt elseBranch",
             "Print : Expr expression",
             "Var : Token name, Expr initializer",
+            "Const : Token name, Expr initializer",
             "While : Expr condition, Stmt body",
             "Break : Token keyword",
             "Continue : Token keyword",

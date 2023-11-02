@@ -11,7 +11,9 @@ public class Environment {
 
     final Environment enclosing;
     public final Map<String, Object> values = new HashMap<>();
+    public final Map<String, Object> constants = new HashMap<>();
     
+
     public Environment() {
         enclosing = null;
     }
@@ -19,8 +21,19 @@ public class Environment {
         this.enclosing = enclosing;
     }
 
+    public Boolean isConstant(String name){
+        return constants.containsKey(name);
+    }
+
+    public Boolean isVariable(String name){
+        return values.containsKey(name);
+    }
+
     public Object get(Token name) {
-        if (values.containsKey(name.lexeme)) {
+        if (isConstant(name.lexeme)) {
+            return constants.get(name.lexeme);
+        }
+        if (isVariable(name.lexeme)) {
             return values.get(name.lexeme);
         }
         if (enclosing != null) return enclosing.get(name);
@@ -29,11 +42,16 @@ public class Environment {
                 "Undefined variable '" + name.lexeme + "'.");
     }
 
-    public void define(String name, Object value) {
+    public void define(String name, Object value) {// this will only handle the variable definition
+        if (isConstant(name)) constants.remove(name); // this will change the constant 
         values.put(name, value);
     }
 
     public void assign(Token name, Object value) {
+        if (constants.containsKey(name.lexeme)){
+            throw new RuntimeError(name,
+                "'" + name.lexeme + "' is a Constant and can't be reassigned.");
+        }
         if (values.containsKey(name.lexeme)) {
             values.put(name.lexeme, value);
             return;
@@ -45,6 +63,9 @@ public class Environment {
         
         throw new UndefinedVariableException(name,
         "Undefined variable '" + name.lexeme + "'.");
+    }
+    public void defineConst(String name, Object value) {
+        constants.put(name, value);
     }
         
 }

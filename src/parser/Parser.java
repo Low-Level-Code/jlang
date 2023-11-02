@@ -216,6 +216,7 @@ public class Parser {
                 case CLASS:
                 case FUN:
                 case VAR:
+                case CONST:
                 case FOR:
                 case IF:
                 case WHILE:
@@ -349,10 +350,21 @@ public class Parser {
         consume(SEMICOLON, "Expect ';' after variable declaration.");
         return new Stmt.Var(name, initializer);
     }
+
+    private Stmt constDeclaration() {
+        Token name = consume(IDENTIFIER, "Expect constant name.");
+        Expr initializer = null;
+        if (match(EQUAL)) {
+           initializer = expression();
+        }
+        consume(SEMICOLON, "Expect ';' after constant declaration.");
+        return new Stmt.Const(name, initializer);
+    }
         
     private Stmt declaration() {
         try {
             if (match(VAR)) return varDeclaration();
+            if (match(CONST)) return constDeclaration();
             return statement();
         } catch (ParseError error) {
             synchronize();
