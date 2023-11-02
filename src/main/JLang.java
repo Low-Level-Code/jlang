@@ -11,6 +11,7 @@ import ast.*;
 import interpreter.Interpreter;
 import interpreter.errors.RuntimeError;
 import parser.Parser;
+import resolver.Resolver;
 import scanner.*;
 import tokenizer.*;
 
@@ -50,6 +51,9 @@ public class JLang {
         // Stop if there was a syntax error.
         if (hadError) return;
         // System.out.println(new AstPrinter().print(expression));
+        Resolver resolver = new Resolver(interpreter);
+        resolver.resolve(statements);
+        if (hadError) return;
         interpreter.interpret(statements);
     }
     public static void error(Token token, String message) {

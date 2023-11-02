@@ -28,7 +28,23 @@ public class Environment {
     public Boolean isVariable(String name){
         return values.containsKey(name);
     }
+    
+    Environment ancestor(int distance) {
+        Environment environment = this;
+        for (int i = 0; i < distance; i++) {
+            environment = environment.enclosing;
+        }
+        return environment;
+    }
 
+    public void assignAt(int distance, Token name, Object value) {
+        ancestor(distance).values.put(name.lexeme, value);
+    }
+         
+    public Object getAt(int distance, String name) {
+        return ancestor(distance).values.get(name);
+    }
+        
     public Object get(Token name) {
         if (isConstant(name.lexeme)) {
             return constants.get(name.lexeme);

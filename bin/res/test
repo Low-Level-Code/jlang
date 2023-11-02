@@ -1,14 +1,14 @@
-fun makeCounter() {
-    var i = 0;
-    fun count() {
-        i = i + 1;
-        print i;
-    }
-    return count;
-}
-var counter = makeCounter();
-counter(); // "1".
-counter(); // "2".
+// fun makeCounter() {
+//     var i = 0;
+//     var count = fun () {
+//         i = i + 1;
+//         print i;
+//     };
+//     return count;
+// }
+// var counter = makeCounter();
+// counter(); // "1".
+// counter(); // "2".
 
 
 fun thrice(fn) {
@@ -45,3 +45,22 @@ shw(f3(5));
 
 var f4 = fun(){ return fun(y){ return y + 1; }; };
 shw(f4()(2));
+
+
+var a = "global";
+{
+fun showA() {
+print a;
+}
+showA();
+var a = "block";
+showA();
+}
+
+var a = "before";
+var f = fun () {
+    print a;
+};
+f();
+a = "after";
+f();
