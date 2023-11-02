@@ -20,14 +20,14 @@ public class GenerateAST {
         // Visitor pattern.
         writer.println();
         writer.println("\t\t@Override");
-        writer.println("\t\t<R> R accept(Visitor<R> visitor) {");
+        writer.println("\t\tpublic <R> R accept(Visitor<R> visitor) {");
         writer.println("\t\t\treturn visitor.visit" +className + baseName + "(this);");
         writer.println("\t\t}");
 
         // Fields.
         writer.println();
         for (String field : fields) {
-            writer.println("\t\tfinal " + field + ";");
+            writer.println("\t\tpublic final " + field + ";");
         }
         writer.println("\t}");
     }
@@ -60,7 +60,7 @@ public class GenerateAST {
         }
         // the base accept method
         writer.println();
-        writer.println("\tabstract <R> R accept(Visitor<R> visitor);");
+        writer.println("\tpublic abstract <R> R accept(Visitor<R> visitor);");
 
         writer.println("}");
         writer.close();
@@ -74,13 +74,22 @@ public class GenerateAST {
         }
         String outputDir = "F:\\Pro Documents\\Low Level Code\\repos\\jlang\\src\\ast";
         defineAst(outputDir, "Expr", Arrays.asList(
+            "Assign : Token name, Expr value",
         "Binary : Expr left, Token operator, Expr right",
             "Grouping : Expr expression",
             "Literal : Object value",
             "Unary : Token operator, Expr right",
             "Block : List<Expr> statements",
             "Comma : Expr left, Expr right",
-            "Ternary : Expr condition, Expr thenExpr, Expr elseExpr"
+            "Ternary : Expr condition, Expr thenExpr, Expr elseExpr",
+            "Variable : Token name"
+        ));
+
+        defineAst(outputDir, "Stmt", Arrays.asList(
+            "Expression : Expr expression",
+            "Print : Expr expression",
+            "Var : Token name, Expr initializer"
+
         ));
 
     }

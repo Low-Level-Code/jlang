@@ -5,6 +5,7 @@ import tokenizer.*;
 
 public abstract class Expr {
 	public interface Visitor<R> {
+		R visitAssignExpr(Assign expr);
 		R visitBinaryExpr(Binary expr);
 		R visitGroupingExpr(Grouping expr);
 		R visitLiteralExpr(Literal expr);
@@ -12,6 +13,21 @@ public abstract class Expr {
 		R visitBlockExpr(Block expr);
 		R visitCommaExpr(Comma expr);
 		R visitTernaryExpr(Ternary expr);
+		R visitVariableExpr(Variable expr);
+	}
+	public static class Assign extends Expr {
+		public Assign(Token name, Expr value) {
+			this.name = name;
+			this.value = value;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitAssignExpr(this);
+		}
+
+		public final Token name;
+		public final Expr value;
 	}
 	public static class Binary extends Expr {
 		public Binary(Expr left, Token operator, Expr right) {
@@ -21,13 +37,13 @@ public abstract class Expr {
 		}
 
 		@Override
-		<R> R accept(Visitor<R> visitor) {
+		public <R> R accept(Visitor<R> visitor) {
 			return visitor.visitBinaryExpr(this);
 		}
 
-		final Expr left;
-		final Token operator;
-		final Expr right;
+		public final Expr left;
+		public final Token operator;
+		public final Expr right;
 	}
 	public static class Grouping extends Expr {
 		public Grouping(Expr expression) {
@@ -35,11 +51,11 @@ public abstract class Expr {
 		}
 
 		@Override
-		<R> R accept(Visitor<R> visitor) {
+		public <R> R accept(Visitor<R> visitor) {
 			return visitor.visitGroupingExpr(this);
 		}
 
-		final Expr expression;
+		public final Expr expression;
 	}
 	public static class Literal extends Expr {
 		public Literal(Object value) {
@@ -47,11 +63,11 @@ public abstract class Expr {
 		}
 
 		@Override
-		<R> R accept(Visitor<R> visitor) {
+		public <R> R accept(Visitor<R> visitor) {
 			return visitor.visitLiteralExpr(this);
 		}
 
-		final Object value;
+		public final Object value;
 	}
 	public static class Unary extends Expr {
 		public Unary(Token operator, Expr right) {
@@ -60,12 +76,12 @@ public abstract class Expr {
 		}
 
 		@Override
-		<R> R accept(Visitor<R> visitor) {
+		public <R> R accept(Visitor<R> visitor) {
 			return visitor.visitUnaryExpr(this);
 		}
 
-		final Token operator;
-		final Expr right;
+		public final Token operator;
+		public final Expr right;
 	}
 	public static class Block extends Expr {
 		public Block(List<Expr> statements) {
@@ -73,11 +89,11 @@ public abstract class Expr {
 		}
 
 		@Override
-		<R> R accept(Visitor<R> visitor) {
+		public <R> R accept(Visitor<R> visitor) {
 			return visitor.visitBlockExpr(this);
 		}
 
-		final List<Expr> statements;
+		public final List<Expr> statements;
 	}
 	public static class Comma extends Expr {
 		public Comma(Expr left, Expr right) {
@@ -86,12 +102,12 @@ public abstract class Expr {
 		}
 
 		@Override
-		<R> R accept(Visitor<R> visitor) {
+		public <R> R accept(Visitor<R> visitor) {
 			return visitor.visitCommaExpr(this);
 		}
 
-		final Expr left;
-		final Expr right;
+		public final Expr left;
+		public final Expr right;
 	}
 	public static class Ternary extends Expr {
 		public Ternary(Expr condition, Expr thenExpr, Expr elseExpr) {
@@ -101,14 +117,26 @@ public abstract class Expr {
 		}
 
 		@Override
-		<R> R accept(Visitor<R> visitor) {
+		public <R> R accept(Visitor<R> visitor) {
 			return visitor.visitTernaryExpr(this);
 		}
 
-		final Expr condition;
-		final Expr thenExpr;
-		final Expr elseExpr;
+		public final Expr condition;
+		public final Expr thenExpr;
+		public final Expr elseExpr;
+	}
+	public static class Variable extends Expr {
+		public Variable(Token name) {
+			this.name = name;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitVariableExpr(this);
+		}
+
+		public final Token name;
 	}
 
-	abstract <R> R accept(Visitor<R> visitor);
+	public abstract <R> R accept(Visitor<R> visitor);
 }

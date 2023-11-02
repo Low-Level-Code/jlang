@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ast.Expr;
+import ast.Stmt;
 import main.JLang;
 
 import static tokenizer.TokenType.*;
@@ -63,13 +64,16 @@ public class Parser {
     }
 
     private Expr primary() {
-        if (match(LEFT_BRACE)) return block(); // Block implementation
+        // if (match(LEFT_BRACE)) return block(); // Block implementation
         if (match(FALSE)) return new Expr.Literal(false);
         if (match(TRUE)) return new Expr.Literal(true);
         if (match(NIL)) return new Expr.Literal(null);
         if (match(NUMBER, STRING)) {
            return new Expr.Literal(previous().literal);
         }
+        if (match(IDENTIFIER)) {
+            return new Expr.Variable(previous());
+        }   
         if (match(LEFT_PAREN)) {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
@@ -139,7 +143,23 @@ public class Parser {
         
     private Expr expression() {
         // support for comma seperated statements
-        return comma();
+        // return comma();
+        return assignment();
+
+    }
+    private Expr assignment() {
+        // Expr expr = equality();
+        Expr expr = ternary(); // to allow tenary operations
+        if (match(EQUAL)) {
+            Token equals = previous();
+            Expr value = assignment();
+        if (expr instanceof Expr.Variable) {
+            Token name = ((Expr.Variable)expr).name;
+            return new Expr.Assign(name, value);
+        }
+        error(equals, "Invalid assignment target.");
+        }
+        return expr;
     }
 
     private Expr comma() {
@@ -181,14 +201,49 @@ public class Parser {
             advance();
         }
     }
-    public Expr parse() {
+    private Stmt expressionStatement() {
+        Expr expr = expression();
+        consume(SEMICOLON, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
+    }
+        
+    private Stmt printStatement() {
+        Expr value = expression();
+        consume(SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
+    }
+        
+    private Stmt statement() {
+        if (match(PRINT)) return printStatement();
+        return expressionStatement();
+    }
+
+    private Stmt varDeclaration() {
+        Token name = consume(IDENTIFIER, "Expect variable name.");
+        Expr initializer = null;
+        if (match(EQUAL)) {
+           initializer = expression();
+        }
+        consume(SEMICOLON, "Expect ';' after variable declaration.");
+        return new Stmt.Var(name, initializer);
+    }
+        
+    private Stmt declaration() {
         try {
-            return expression();
+            if (match(VAR)) return varDeclaration();
+            return statement();
         } catch (ParseError error) {
+            synchronize();
             return null;
         }
     }
         
-        
+    public List<Stmt> parse() {
+        List<Stmt> statements = new ArrayList<>();
+        while (!isAtEnd()) {
+            statements.add(declaration());
+        }
+        return statements;
+    }
         
 }
