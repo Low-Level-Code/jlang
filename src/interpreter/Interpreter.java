@@ -9,6 +9,7 @@ import ast.Expr.Comma;
 import ast.Stmt;
 import ast.Stmt.Catch;
 import ast.Stmt.Print;
+import ast.Stmt.Return;
 import enivirement.Environment;
 import interpreter.builtins.methods.AbsFunc;
 import interpreter.builtins.methods.ClockFun;
@@ -23,11 +24,13 @@ import interpreter.builtins.methods.SqrtFunc;
 import interpreter.builtins.methods.SumFunc;
 import interpreter.builtins.methods.TypeOfFunc;
 import interpreter.callable.JLangCallable;
-import interpreter.errors.BreakException;
-import interpreter.errors.ContinueException;
+import interpreter.callable.JLangFunction;
 import interpreter.errors.DivisionByZeroException;
 import interpreter.errors.InvalidArgumentsException;
 import interpreter.errors.RuntimeError;
+import interpreter.exceptions.BreakException;
+import interpreter.exceptions.ContinueException;
+import interpreter.exceptions.ReturnException;
 import main.JLang;
 import tokenizer.Token;
 import tokenizer.TokenType;
@@ -35,7 +38,7 @@ import tokenizer.TokenType;
 public class Interpreter implements Expr.Visitor<Object>,
                                     Stmt.Visitor<Void> {
 
-    final Environment globals = new Environment();
+    public final Environment globals = new Environment();
     private Environment environment = globals;
     private boolean isInLoop = false;
     public Interpreter() {
@@ -325,9 +328,22 @@ public class Interpreter implements Expr.Visitor<Object>,
             throw new RuntimeError(new Token(TokenType.FUN, "", null, 1), e.getMessage());
         }
     }
+    @Override
+    public Void visitFunctionStmt(Stmt.Function stmt) {
+        JLangFunction function = new JLangFunction(stmt);
+        environment.define(stmt.name.lexeme, function);
+        return null;
+    }
+
+    @Override
+    public Void visitReturnStmt(Stmt.Return stmt) {
+        Object value = null;
+        if (stmt.value != null) value = evaluate(stmt.value);
+        throw new ReturnException(value);
+    }
 
 
-    void executeBlock(List<Stmt> statements,
+    public void executeBlock(List<Stmt> statements,
         Environment environment) {
         Environment previous = this.environment;
         try {

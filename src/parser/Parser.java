@@ -356,6 +356,15 @@ public class Parser {
     
         return new Stmt.TryCatch(tryBlock, catchBlocks);
     }
+    private Stmt returnStatement() {
+        Token keyword = previous();
+        Expr value = null;
+        if (!check(SEMICOLON)) {
+        value = expression();
+        }
+        consume(SEMICOLON, "Expect ';' after return value.");
+        return new Stmt.Return(keyword, value);
+    }
 
     private Stmt statement() {
         if (match(TRY)) return tryCatchStatement(); // break statement yaaay
@@ -363,6 +372,7 @@ public class Parser {
         if (match(CONTINUE)) return continueStatement(); // continue still has an embarrassing bug
         if (match(IF)) return ifStatement();
         if (match(PRINT)) return printStatement();
+        if (match(RETURN)) return returnStatement();
         if (match(WHILE)) return whileStatement();
         if (match(FOR)) return forStatement();
         if (match(LEFT_BRACE)) return new Stmt.Block(block());
@@ -388,9 +398,28 @@ public class Parser {
         consume(SEMICOLON, "Expect ';' after constant declaration.");
         return new Stmt.Const(name, initializer);
     }
+
+    private Stmt.Function function(String kind) {
+        Token name = consume(IDENTIFIER, "Expect " + kind + " name.");
+        consume(LEFT_PAREN, "Expect '(' after " + kind + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (parameters.size() >= FUNC_ARG_LIMIT) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+                parameters.add(consume(IDENTIFIER, "Expect parameter name."));
+            } while (match(COMMA));
+        }
+        consume(RIGHT_PAREN, "Expect ')' after parameters.");
+        consume(LEFT_BRACE, "Expect '{' before " + kind + " body.");
+        List<Stmt> body = block();
+        return new Stmt.Function(name, parameters, body);
+    }
         
     private Stmt declaration() {
         try {
+            if (match(FUN)) return function("function");
             if (match(VAR)) return varDeclaration();
             if (match(CONST)) return constDeclaration();
             return statement();

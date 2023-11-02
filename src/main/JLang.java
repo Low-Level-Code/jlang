@@ -73,10 +73,15 @@ public class JLang {
     }
 
     public static void main(String[] args) throws IOException {
+        String filePath = "F:\\Pro Documents\\Low Level Code\\repos\\jlang\\src\\res\\test";
+        if (filePath != ""){
+            runFile(filePath);
+            System.exit(64);
+        }
         if (args.length > 1) {
             System.out.println("Usage: jlox [script]");
             System.exit(64);
-        } else if (args.length == 1) {
+        } else if (args.length == 1 ) {
             runFile(args[0]);
         } else {
             runPrompt();

@@ -1,3 +1,3 @@
-package interpreter.errors;
+package interpreter.exceptions;
 
 public class BreakException extends RuntimeException {}
