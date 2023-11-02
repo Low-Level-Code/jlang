@@ -1,5 +1,6 @@
 package interpreter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import ast.Expr;
@@ -9,9 +10,23 @@ import ast.Stmt;
 import ast.Stmt.Catch;
 import ast.Stmt.Print;
 import enivirement.Environment;
+import interpreter.builtins.methods.AbsFunc;
+import interpreter.builtins.methods.ClockFun;
+import interpreter.builtins.methods.LenFunc;
+import interpreter.builtins.methods.MaxFunc;
+import interpreter.builtins.methods.MinFunc;
+import interpreter.builtins.methods.PrintFunc;
+import interpreter.builtins.methods.RandFunc;
+import interpreter.builtins.methods.RangeFunc;
+import interpreter.builtins.methods.RoundFunc;
+import interpreter.builtins.methods.SqrtFunc;
+import interpreter.builtins.methods.SumFunc;
+import interpreter.builtins.methods.TypeOfFunc;
+import interpreter.callable.JLangCallable;
 import interpreter.errors.BreakException;
 import interpreter.errors.ContinueException;
 import interpreter.errors.DivisionByZeroException;
+import interpreter.errors.InvalidArgumentsException;
 import interpreter.errors.RuntimeError;
 import main.JLang;
 import tokenizer.Token;
@@ -20,8 +35,24 @@ import tokenizer.TokenType;
 public class Interpreter implements Expr.Visitor<Object>,
                                     Stmt.Visitor<Void> {
 
-    public Environment environment = new Environment();
+    final Environment globals = new Environment();
+    private Environment environment = globals;
     private boolean isInLoop = false;
+    public Interpreter() {
+        globals.define("clock", new ClockFun());
+        globals.define("min", new MinFunc());
+        globals.define("max", new MaxFunc());
+        globals.define("abs", new AbsFunc());
+        globals.define("sqrt", new SqrtFunc());
+        globals.define("round", new RoundFunc());
+        globals.define("sum", new SumFunc());
+        globals.define("range", new RangeFunc());
+        globals.define("len", new LenFunc());
+        globals.define("shw", new PrintFunc());
+        globals.define("type", new TypeOfFunc());
+        globals.define("rand", new RandFunc());
+    }
+
 
     private Object evaluate(Expr expr) {
         return expr.accept(this);
@@ -268,6 +299,34 @@ public class Interpreter implements Expr.Visitor<Object>,
         }
         return null;
     }
+    @Override
+    public Object visitCallExpr(Expr.Call expr) {
+        Object callee = evaluate(expr.callee);
+        List<Object> arguments = new ArrayList<>();
+        for (Expr argument : expr.arguments) {
+            arguments.add(evaluate(argument));
+        }
+        if (!(callee instanceof JLangCallable)) { // if something that's not a function calls something
+            throw new RuntimeError(expr.paren,
+            "Can only call functions and classes.");
+        }
+        
+        JLangCallable function = (JLangCallable)callee;
+
+        if (arguments.size() != function.arity() && function.arity() != -1) { // if the number of arguments is bigger than it should be, the -1 is for dynamic arguments
+            throw new RuntimeError(expr.paren, "Expected " +
+            function.arity() + " arguments but got " +
+            arguments.size() + ".");
+        } 
+            
+        try {
+            return function.call(this, arguments);
+        } catch (InvalidArgumentsException e) { // catching errors for built-in functions
+            throw new RuntimeError(new Token(TokenType.FUN, "", null, 1), e.getMessage());
+        }
+    }
+
+
     void executeBlock(List<Stmt> statements,
         Environment environment) {
         Environment previous = this.environment;

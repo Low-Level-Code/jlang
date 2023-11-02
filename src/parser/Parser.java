@@ -16,6 +16,7 @@ public class Parser {
     private static class ParseError extends RuntimeException {}
     private final List < Token > tokens;
     private int current = 0;
+    public static int FUNC_ARG_LIMIT = 255;
     public Parser(List < Token > tokens) {
         this.tokens = tokens;
     }
@@ -93,14 +94,41 @@ public class Parser {
     //     consume(RIGHT_BRACE, "Expect '}' after block.");
     //     return new Expr.Block(statements);
     // }
+    
 
+    private Expr finishCall(Expr callee) {
+        List<Expr> arguments = new ArrayList<>();
+        if (!check(RIGHT_PAREN)) {
+            do {
+                if (arguments.size() >= FUNC_ARG_LIMIT) {
+                    error(peek(), "Can't have more than "+FUNC_ARG_LIMIT+" arguments.");
+                }   
+                arguments.add(expression());
+            } while (match(COMMA));
+        }
+        Token paren = consume(RIGHT_PAREN, "Expect ')' after arguments.");
+        return new Expr.Call(callee, paren, arguments);
+    }
+
+    private Expr call() {
+        Expr expr = primary();
+        while (true) {
+            if (match(LEFT_PAREN)) { // this should make sure that we have nested calls to the functions
+                expr = finishCall(expr);
+            } else {
+                break;
+            }
+        }
+        return expr;
+    }
+        
     private Expr unary() {
         if (match(BANG, MINUS)) {
             Token operator = previous();
             Expr right = unary();
             return new Expr.Unary(operator, right);
         }
-        return primary();
+        return call();
     }
 
     private Expr factor() {
