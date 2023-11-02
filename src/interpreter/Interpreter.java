@@ -8,14 +8,18 @@ import ast.Expr.Comma;
 import ast.Stmt;
 import ast.Stmt.Print;
 import enivirement.Environment;
+import interpreter.errors.BreakException;
+import interpreter.errors.ContinueException;
 import interpreter.errors.RuntimeError;
 import main.JLang;
 import tokenizer.Token;
+import tokenizer.TokenType;
 
 public class Interpreter implements Expr.Visitor<Object>,
                                     Stmt.Visitor<Void> {
 
     public Environment environment = new Environment();
+    private boolean isInLoop = false;
 
     private Object evaluate(Expr expr) {
         return expr.accept(this);
@@ -181,6 +185,59 @@ public class Interpreter implements Expr.Visitor<Object>,
     public Void visitBlockStmt(Stmt.Block stmt) {
         executeBlock(stmt.statements, new Environment(environment));
         return null;
+    }
+    @Override
+    public Void visitIfStmt(Stmt.If stmt) {
+        if (isTruthy(evaluate(stmt.condition))) {
+            execute(stmt.thenBranch);
+        } else if (stmt.elseBranch != null) {
+            execute(stmt.elseBranch);
+        }
+        return null;
+    }
+    @Override
+    public Object visitLogicalExpr(Expr.Logical expr) {
+        Object left = evaluate(expr.left);
+        if (expr.operator.type == TokenType.OR) {
+            if (isTruthy(left)) return left;
+        } else {
+            if (!isTruthy(left)) return left;
+        }
+        return evaluate(expr.right);
+    }
+
+    @Override
+    public Void visitWhileStmt(Stmt.While stmt) {
+        try {
+            isInLoop = true;
+            while (isTruthy(evaluate(stmt.condition))) {
+                try {
+                    execute(stmt.body);
+                } catch (ContinueException e){
+                    // ignore and continue the loop
+                }
+            }
+        } catch (BreakException ex) {
+            // Break encountered, we yeet here out of the loop.
+            isInLoop = false;
+        } finally {
+            isInLoop = false;
+        }
+        return null;
+    }
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        if (!isInLoop) {
+            throw new RuntimeError(stmt.keyword, "Break statement must be inside a loop.");
+        }
+        throw new BreakException();
+    }
+    @Override
+    public Void visitContinueStmt(Stmt.Continue stmt) {
+        if (!isInLoop) {
+            throw new RuntimeError(stmt.keyword, "Continue statement must be inside a loop.");
+        }
+        throw new ContinueException();
     }
     void executeBlock(List<Stmt> statements,
         Environment environment) {

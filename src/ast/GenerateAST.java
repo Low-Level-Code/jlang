@@ -68,16 +68,14 @@ public class GenerateAST {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Generate AST");
-        if (args.length != 1) {
-            System.err.println("Usage: generate_ast <output directory>");
-            System.exit(64);
-        }
         String outputDir = "F:\\Pro Documents\\Low Level Code\\repos\\jlang\\src\\ast";
+        
         defineAst(outputDir, "Expr", Arrays.asList(
             "Assign : Token name, Expr value",
             "Binary : Expr left, Token operator, Expr right",
             "Grouping : Expr expression",
             "Literal : Object value",
+            "Logical : Expr left, Token operator, Expr right",
             "Unary : Token operator, Expr right",
             "Block : List<Expr> statements",
             "Comma : Expr left, Expr right",
@@ -88,8 +86,13 @@ public class GenerateAST {
         defineAst(outputDir, "Stmt", Arrays.asList(
             "Block : List<Stmt> statements",    
             "Expression : Expr expression",
+            "If : Expr condition, Stmt thenBranch," +
+                                " Stmt elseBranch",
             "Print : Expr expression",
-            "Var : Token name, Expr initializer"
+            "Var : Token name, Expr initializer",
+            "While : Expr condition, Stmt body",
+            "Break : Token keyword",
+            "Continue : Token keyword"
 
         ));
 
