@@ -82,15 +82,15 @@ public class Parser {
         throw error(peek(), "Expect expression.");
     }
  
-    private Expr block() {
-        List<Expr> statements = new ArrayList<>();
-        while (!check(RIGHT_BRACE) && !isAtEnd()) {
-            statements.add(expression());
-            // Consume semicolons or other delimiters as needed
-        }
-        consume(RIGHT_BRACE, "Expect '}' after block.");
-        return new Expr.Block(statements);
-    }
+    // private Expr block() {
+    //     List<Expr> statements = new ArrayList<>();
+    //     while (!check(RIGHT_BRACE) && !isAtEnd()) {
+    //         statements.add(expression());
+    //         // Consume semicolons or other delimiters as needed
+    //     }
+    //     consume(RIGHT_BRACE, "Expect '}' after block.");
+    //     return new Expr.Block(statements);
+    // }
 
     private Expr unary() {
         if (match(BANG, MINUS)) {
@@ -213,8 +213,18 @@ public class Parser {
         return new Stmt.Print(value);
     }
         
+    private List<Stmt> block() {
+        List<Stmt> statements = new ArrayList<>();
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+           statements.add(declaration());
+        }
+        consume(RIGHT_BRACE, "Expect '}' after block.");
+        return statements;
+    }
+        
     private Stmt statement() {
         if (match(PRINT)) return printStatement();
+        if (match(LEFT_BRACE)) return new Stmt.Block(block());
         return expressionStatement();
     }
 
@@ -244,6 +254,22 @@ public class Parser {
             statements.add(declaration());
         }
         return statements;
+    }
+    
+    public Object parseLine() {
+        try {
+            // Try to parse as a statement
+            if (check(EOF)) {
+                return null; // Only whitespace or comment
+            }
+            return declaration();
+        } catch (ParseError error) {
+            // If it fails, revert to the starting point and try as expression
+            current = 0;
+            Expr expression = expression();
+            consume(EOF, "Expect end of expression");
+            return expression;
+        }
     }
         
 }
