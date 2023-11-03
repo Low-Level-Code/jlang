@@ -94,7 +94,17 @@ public class Interpreter implements Expr.Visitor<Object>,
         }
     }
         
-
+    private void updateVariable(Expr operand, double newValue) {
+        if (operand instanceof Expr.Variable) {
+            Expr.Variable var = (Expr.Variable)operand;
+            // Assuming you have an environment that keeps track of variable values
+            // The environment might be a simple map or a more complex structure
+            // that handles scoping
+            environment.assign(var.name, newValue);
+        } else {
+            throw new RuntimeException("The operand is not a variable and cannot be assigned a new value.");
+        }
+    }
     @Override
     public Object visitBinaryExpr(Expr.Binary expr) {
         Object left = evaluate(expr.left);
@@ -158,11 +168,41 @@ public class Interpreter implements Expr.Visitor<Object>,
             case MINUS:
                 checkNumberOperand(expr.operator, right);
                 return -(double)right;
+            case INCREMENT:
+                checkNumberOperand(expr.operator, right);
+                double incrementedValue = (double)right + 1.0;
+                updateVariable(expr.right, incrementedValue);
+                return right; 
+            case DECREMENT:
+                checkNumberOperand(expr.operator, right);
+                double decrementedValue = (double)right - 1.0;
+                updateVariable(expr.right, decrementedValue);
+                return right; 
         }
         // Unreachable.
         return null;
     }
-
+    @Override
+    public Object visitPostfixExpr(Expr.Postfix expr) {
+        Object operand = evaluate(expr.left);
+    
+        switch (expr.operator.type) {
+            case INCREMENT:
+                checkNumberOperand(expr.operator, operand);
+                double incrementedValue = (double)operand + 1.0;
+                updateVariable(expr.left, incrementedValue);
+                return operand;
+                
+            case DECREMENT:
+                checkNumberOperand(expr.operator, operand);
+                double decrementedValue = (double)operand - 1.0;
+                updateVariable(expr.left, decrementedValue);
+                return operand;
+    
+            default:
+                throw new RuntimeException("Unexpected postfix operator: " + expr.operator.type);
+        }
+    }
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
         return expr.value;
@@ -469,12 +509,7 @@ public class Interpreter implements Expr.Visitor<Object>,
         return object.toString();
     }
     private void execute(Stmt stmt) {
-        try {
-            stmt.accept(this);
-        } catch (Exception e) {
-            System.out.println(e.getClass().getSimpleName()+" : "+e.getMessage());
-            System.exit(64); // exit if something fucked up
-        }
+        stmt.accept(this);
         // stmt.accept(this);
     }
     public void interpret(List<Stmt> statements) {

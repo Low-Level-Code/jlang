@@ -82,6 +82,7 @@ public class GenerateAST {
             "Super : Token keyword, Token method",
             "This : Token keyword",
             "Unary : Token operator, Expr right",
+            "Postfix : Expr left, Token operator",
             "Block : List<Expr> statements",
             "Comma : Expr left, Expr right",
             "Ternary : Expr condition, Expr thenExpr, Expr elseExpr",

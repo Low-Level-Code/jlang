@@ -16,6 +16,7 @@ public abstract class Expr {
 		R visitSuperExpr(Super expr);
 		R visitThisExpr(This expr);
 		R visitUnaryExpr(Unary expr);
+		R visitPostfixExpr(Postfix expr);
 		R visitBlockExpr(Block expr);
 		R visitCommaExpr(Comma expr);
 		R visitTernaryExpr(Ternary expr);
@@ -177,6 +178,20 @@ public abstract class Expr {
 
 		public final Token operator;
 		public final Expr right;
+	}
+	public static class Postfix extends Expr {
+		public Postfix(Expr left, Token operator) {
+			this.left = left;
+			this.operator = operator;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitPostfixExpr(this);
+		}
+
+		public final Expr left;
+		public final Token operator;
 	}
 	public static class Block extends Expr {
 		public Block(List<Expr> statements) {

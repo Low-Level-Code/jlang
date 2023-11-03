@@ -53,14 +53,11 @@ public class Parser {
         return false;
     }
     
-
-        
     private ParseError error(Token token, String message) {
         JLang.error(token, message);
         return new ParseError();
     }
         
-
     private Token consume(TokenType type, String message) {
         if (check(type)) return advance();
         throw error(peek(), message);
@@ -126,14 +123,27 @@ public class Parser {
         }
         return expr;
     }
-        
+
+    private Expr postfix() {
+        Expr expr = call();
+        while (match(INCREMENT, DECREMENT)) {
+            Token operator = previous();
+            expr = new Expr.Postfix(expr, operator);
+        }
+        return expr;
+    }
     private Expr unary() {
+        if (match(INCREMENT, DECREMENT)) {
+            Token operator = previous();
+            Expr right = unary();
+            return new Expr.Unary(operator, right); // 'true' if your Expr.Unary supports postfix
+        }
         if (match(BANG, MINUS)) {
             Token operator = previous();
             Expr right = unary();
             return new Expr.Unary(operator, right);
         }
-        return call();
+        return postfix();
     }
 
     private Expr factor() {

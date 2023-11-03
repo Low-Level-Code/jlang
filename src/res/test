@@ -1,6 +1,11 @@
 fun bench(){
-    var c = clock();
-    print sum(range(1,10000000));
-    print("It took "+(clock()-c));
+    var b = fun (){
+        var c = clock();
+        print sum(range(1,10000000));
+        print("It took "+(clock()-c));
+    };
+    return b;
 }
-bench();
+// bench()();
+var bencher = bench();
+bencher();
