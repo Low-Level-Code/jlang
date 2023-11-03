@@ -1,4 +1,4 @@
-package interpreter.builtins.methods;
+package interpreter.builtins.methods.math;
 
 import java.util.List;
 import interpreter.Interpreter;

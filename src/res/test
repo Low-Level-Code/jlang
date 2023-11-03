@@ -1,3 +1,6 @@
-print sprint("hello world! %s");
-print sprint("hello world! %s");
-print sprint("hello world! %s", "me");
+fun bench(){
+    var c = clock();
+    print sum(range(1,10000000));
+    print("It took "+(clock()-c));
+}
+bench();

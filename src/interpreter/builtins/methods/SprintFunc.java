@@ -39,8 +39,7 @@ public class SprintFunc implements JLangCallable {
         try {
             return String.format(format, formatValues);
         } catch (MissingFormatArgumentException e) {
-            JLang.error(Scanner.getLine(), "you fucked up");
-            return null;
+            throw new RuntimeException("Formating elements don't match");
         }
     }
 }

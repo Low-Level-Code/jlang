@@ -67,7 +67,8 @@ public class JLang {
         report(line, "", message);
     }
     private static void report(int line, String where, String message) {
-        System.err.println("[line " + line + "] Error" + where + ": " + message);
+        if (line != -1)System.out.print("[line " + line + "] ");
+        System.err.println("Error" + where + ": " + message);
         hadError = true;
     }
     public static void runtimeError(RuntimeError error) {

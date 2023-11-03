@@ -13,20 +13,8 @@ import ast.Stmt.Catch;
 import ast.Stmt.Print;
 import ast.Stmt.Return;
 import enivirement.Environment;
-import interpreter.builtins.methods.AbsFunc;
-import interpreter.builtins.methods.ClockFun;
-import interpreter.builtins.methods.InputFunc;
-import interpreter.builtins.methods.LenFunc;
-import interpreter.builtins.methods.MaxFunc;
-import interpreter.builtins.methods.MinFunc;
-import interpreter.builtins.methods.PrintFunc;
-import interpreter.builtins.methods.RandFunc;
-import interpreter.builtins.methods.RangeFunc;
-import interpreter.builtins.methods.RoundFunc;
-import interpreter.builtins.methods.SprintFunc;
-import interpreter.builtins.methods.SqrtFunc;
-import interpreter.builtins.methods.SumFunc;
-import interpreter.builtins.methods.TypeOfFunc;
+import interpreter.builtins.methods.*;
+import interpreter.builtins.methods.math.*;
 import interpreter.callable.JLangAnonymousFunction;
 import interpreter.callable.JLangCallable;
 import interpreter.callable.JLangFunction;
@@ -52,9 +40,6 @@ public class Interpreter implements Expr.Visitor<Object>,
         globals.define("clock", new ClockFun());
         globals.define("min", new MinFunc());
         globals.define("max", new MaxFunc());
-        globals.define("abs", new AbsFunc());
-        globals.define("sqrt", new SqrtFunc());
-        globals.define("round", new RoundFunc());
         globals.define("sum", new SumFunc());
         globals.define("range", new RangeFunc());
         globals.define("len", new LenFunc());
@@ -63,6 +48,17 @@ public class Interpreter implements Expr.Visitor<Object>,
         globals.define("rand", new RandFunc());
         globals.define("input", new InputFunc());
         globals.define("sprint", new SprintFunc());
+        // maths
+        globals.define("abs", new AbsFunc());
+        globals.define("sqrt", new SqrtFunc());
+        globals.define("round", new RoundFunc());
+        globals.define("cos", new CosFunc());
+        globals.define("sin", new SinFunc());
+        globals.define("tan", new TanFunc());
+        globals.define("log", new LogFunc());
+        globals.define("exp", new ExpFunc());
+        globals.define("ceil", new CeilFunc());
+        globals.define("floor", new FloorFunc());
     }
 
 
@@ -473,7 +469,13 @@ public class Interpreter implements Expr.Visitor<Object>,
         return object.toString();
     }
     private void execute(Stmt stmt) {
-        stmt.accept(this);
+        try {
+            stmt.accept(this);
+        } catch (Exception e) {
+            System.out.println(e.getClass().getSimpleName()+" : "+e.getMessage());
+            System.exit(64); // exit if something fucked up
+        }
+        // stmt.accept(this);
     }
     public void interpret(List<Stmt> statements) {
         try {
