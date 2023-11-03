@@ -11,10 +11,12 @@ import ast.Expr;
 import ast.Stmt;
 
 public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
-    
+    // TODO: Fix the variable instanciation in the for loop 
+    // TODO: Fix anonymous functions not declared when in the local scope
     private final Interpreter interpreter;
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
+    private int loopDepth = 0;
 
 
     public Resolver(Interpreter interpreter) {
@@ -142,6 +144,8 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
     @Override
     public Void visitLambdaFunctionExpr(Expr.LambdaFunction expr) {
+        declare(expr.name);
+        define(expr.name);
         resolveFunction(expr, FunctionType.LAMBDA);
         return null;
     }
@@ -179,8 +183,10 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
+        loopDepth++;
         resolve(stmt.condition);
         resolve(stmt.body);
+        loopDepth--;
         return null;
     }
     @Override
@@ -215,6 +221,80 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     @Override
     public Void visitUnaryExpr(Expr.Unary expr) {
         resolve(expr.right);
+        return null;
+    }
+    @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        declare(stmt.name);
+        define(stmt.name);
+        return null;
+    }
+
+    @Override
+    public Void visitGetExpr(Expr.Get expr) {
+        resolve(expr.object);
+        return null;
+    }
+
+    @Override
+    public Void visitSetExpr(Expr.Set expr) {
+        resolve(expr.value);
+        resolve(expr.object);
+        return null;
+    }
+
+    @Override
+    public Void visitTernaryExpr(Expr.Ternary expr) {
+        resolve(expr.condition); // Resolve the condition part
+        resolve(expr.thenExpr);  // Resolve the 'then' part
+        resolve(expr.elseExpr);  // Resolve the 'else' part
+        return null;
+    }
+
+    @Override
+    public Void visitCommaExpr(Expr.Comma expr) {
+        resolve(expr.left);  // Resolve the left expression
+        resolve(expr.right); // Resolve the right expression, which is the result of the comma expression
+        return null;
+    }
+
+    @Override
+    public Void visitBreakStmt(Stmt.Break stmt) {
+        if (loopDepth <= 0) {
+            JLang.error(stmt.keyword, "Break statement must be inside a loop.");
+        }
+        // Do not throw an exception here; the resolver's job is to report errors, not to handle control flow.
+        return null;
+    }
+
+    @Override
+    public Void visitContinueStmt(Stmt.Continue stmt) {
+        if (loopDepth <= 0) {
+            JLang.error(stmt.keyword, "Continue statement must be inside a loop.");
+        }
+        // Do not throw an exception here; same reason as above.
+        return null;
+    }
+
+    @Override
+    public Void visitTryCatchStmt(Stmt.TryCatch stmt) {
+        // Resolve the try block
+        resolve(stmt.tryBlock);
+
+        // Resolve each catch block
+        for (Stmt.Catch catchBlock : stmt.catchBlocks) {
+            beginScope();
+            declare(catchBlock.variable);
+            define(catchBlock.variable);
+            resolve(catchBlock.block);
+            endScope();
+        }
+
+        // If there's a finally block, resolve it too
+        if (stmt.finallyBlock != null) {
+            resolve(stmt.finallyBlock);
+        }
+
         return null;
     }
 

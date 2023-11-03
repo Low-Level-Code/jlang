@@ -10,15 +10,39 @@
 // counter(); // "1".
 // counter(); // "2".
 
+var i = 1;
+while (i < 20) {
+    shw(i+"\n");
+    if(i > 5) {i = i+2; continue;}
+    if (i == 10)break;
+    i = i + 1;
+}
+for(var i = 0; i < 20; i = i + 1){
+    shw(i+"\n");
+    if(i > 5) {i = i+2; continue;}
+    if (i == 10)break;
+}
 
-fun thrice(fn) {
-    for (var i = 1; i <= 3; i = i + 1) {
-    fn(i);
+class DevonshireCream {
+    serveOn() {
+        return "Scones";
     }
-    }
-    thrice(fun (a) {
-    print a;
-    });
+}
+print DevonshireCream; 
+
+class Bagel {}
+var bagel = Bagel();
+print bagel;
+
+var a = 3 ? "a" : "b"; 
+print a; 
+
+// fun thrice() {
+//     for (var i = 1; i <= 3; i = i + 1) {
+//         shw(i);
+//     }
+// }
+// thrice();
     // "1".
     // "2".
     // "3".

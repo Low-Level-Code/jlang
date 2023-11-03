@@ -74,9 +74,11 @@ public class GenerateAST {
             "Assign : Token name, Expr value",
             "Binary : Expr left, Token operator, Expr right",
             "Grouping : Expr expression",
+            "Get : Expr object, Token name",
             "Call : Expr callee, Token paren, List<Expr> arguments",
             "Literal : Object value",
             "Logical : Expr left, Token operator, Expr right",
+            "Set : Expr object, Token name, Expr value",
             "Unary : Token operator, Expr right",
             "Block : List<Expr> statements",
             "Comma : Expr left, Expr right",
@@ -88,7 +90,8 @@ public class GenerateAST {
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(
-            "Block : List<Stmt> statements",    
+            "Block : List<Stmt> statements", 
+            "Class : Token name, List<Stmt.Function> methods",   
             "Expression : Expr expression",
             "Function : Token name, List<Token> params," +
                                 " List<Stmt> body",
@@ -101,7 +104,7 @@ public class GenerateAST {
             "While : Expr condition, Stmt body",
             "Break : Token keyword",
             "Continue : Token keyword",
-            "TryCatch : Stmt tryBlock, List<Catch> catchBlocks",
+            "TryCatch : Stmt tryBlock, List<Catch> catchBlocks, Stmt finallyBlock",
             "Catch : Token exceptionType, Token variable, Stmt block"
 
 

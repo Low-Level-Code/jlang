@@ -6,6 +6,7 @@ import tokenizer.*;
 public abstract class Stmt {
 	public interface Visitor<R> {
 		R visitBlockStmt(Block stmt);
+		R visitClassStmt(Class stmt);
 		R visitExpressionStmt(Expression stmt);
 		R visitFunctionStmt(Function stmt);
 		R visitIfStmt(If stmt);
@@ -30,6 +31,20 @@ public abstract class Stmt {
 		}
 
 		public final List<Stmt> statements;
+	}
+	public static class Class extends Stmt {
+		public Class(Token name, List<Stmt.Function> methods) {
+			this.name = name;
+			this.methods = methods;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitClassStmt(this);
+		}
+
+		public final Token name;
+		public final List<Stmt.Function> methods;
 	}
 	public static class Expression extends Stmt {
 		public Expression(Expr expression) {
@@ -168,9 +183,10 @@ public abstract class Stmt {
 		public final Token keyword;
 	}
 	public static class TryCatch extends Stmt {
-		public TryCatch(Stmt tryBlock, List<Catch> catchBlocks) {
+		public TryCatch(Stmt tryBlock, List<Catch> catchBlocks, Stmt finallyBlock) {
 			this.tryBlock = tryBlock;
 			this.catchBlocks = catchBlocks;
+			this.finallyBlock = finallyBlock;
 		}
 
 		@Override
@@ -180,6 +196,7 @@ public abstract class Stmt {
 
 		public final Stmt tryBlock;
 		public final List<Catch> catchBlocks;
+		public final Stmt finallyBlock;
 	}
 	public static class Catch extends Stmt {
 		public Catch(Token exceptionType, Token variable, Stmt block) {

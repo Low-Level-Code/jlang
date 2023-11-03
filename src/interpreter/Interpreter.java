@@ -34,6 +34,8 @@ import interpreter.errors.RuntimeError;
 import interpreter.exceptions.BreakException;
 import interpreter.exceptions.ContinueException;
 import interpreter.exceptions.ReturnException;
+import interpreter.klass.JLangClass;
+import interpreter.klass.JLangInstance;
 import main.JLang;
 import tokenizer.Token;
 import tokenizer.TokenType;
@@ -44,7 +46,6 @@ public class Interpreter implements Expr.Visitor<Object>,
     public final Environment globals = new Environment();
     private Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
-    private boolean isInLoop = false;
     public Interpreter() {
         globals.define("clock", new ClockFun());
         globals.define("min", new MinFunc());
@@ -273,52 +274,54 @@ public class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitWhileStmt(Stmt.While stmt) {
-        try {
-            isInLoop = true;
-            while (isTruthy(evaluate(stmt.condition))) {
-                try {
-                    execute(stmt.body);
-                } catch (ContinueException e){
-                    // ignore and continue the loop
-                }
+        while (isTruthy(evaluate(stmt.condition))) {
+            try {
+                execute(stmt.body);
+            } catch (ContinueException e) {
+                // ContinueException is used to skip the rest of the current iteration and proceed with loop
+                continue; // Explicitly continue to the next iteration
+            } catch (BreakException e) {
+                // BreakException is used to exit the loop early
+                break; // Break out of the while loop
             }
-        } catch (BreakException ex) {
-            // Break encountered, we yeet here out of the loop.
-            isInLoop = false;
-        } finally {
-            isInLoop = false;
         }
         return null;
     }
     @Override
     public Void visitBreakStmt(Stmt.Break stmt) {
-        if (!isInLoop) {
-            throw new RuntimeError(stmt.keyword, "Break statement must be inside a loop.");
-        }
         throw new BreakException();
     }
     @Override
     public Void visitContinueStmt(Stmt.Continue stmt) {
-        if (!isInLoop) {
-            throw new RuntimeError(stmt.keyword, "Continue statement must be inside a loop.");
-        }
         throw new ContinueException();
     }
     @Override
     public Void visitTryCatchStmt(Stmt.TryCatch stmt) {
+        boolean caughtException = false;
         try {
             execute(stmt.tryBlock);
         } catch (RuntimeException ex) {
-            for (Catch catchBlock : stmt.catchBlocks) {
+            caughtException = true;
+            for (Stmt.Catch catchBlock : stmt.catchBlocks) {
                 if (ex.getClass().getSimpleName().equals(catchBlock.exceptionType.lexeme)) {
                     // Define the exception in the local environment
                     // and execute the catch block
                     environment.define(catchBlock.variable.lexeme, ex);
                     execute(catchBlock.block);
-                    return null; // Exit after the first matching catch block
+                    caughtException = false; // Exception handled
+                    break; // Exit after the first matching catch block
                 }
             }
-            throw ex; // Rethrow the exception if no matching catch block is found
+            if (caughtException) {
+                throw ex; // Rethrow the exception if no matching catch block is found
+            }
+        } finally {
+            // The finally block should be executed whether an exception was thrown or not.
+            if (stmt.finallyBlock != null) {
+                execute(stmt.finallyBlock);
+            }
+            // If there was an exception that was not caught, it was re-thrown above.
+            // The Java runtime will continue to propagate it after executing the finally block.
         }
         return null;
     }
@@ -368,6 +371,33 @@ public class Interpreter implements Expr.Visitor<Object>,
         return function;
     }
 
+    @Override
+    public Void visitClassStmt(Stmt.Class stmt) {
+        environment.define(stmt.name.lexeme, null);
+        JLangClass klass = new JLangClass(stmt.name.lexeme);
+        environment.assign(stmt.name, klass);
+        return null;
+    }
+
+    @Override
+    public Object visitGetExpr(Expr.Get expr) {
+        Object object = evaluate(expr.object);
+        if (object instanceof JLangInstance) {
+            return ((JLangInstance) object).get(expr.name);
+        }
+        throw new RuntimeError(expr.name, "Only instances have properties.");
+    }
+
+    @Override
+    public Object visitSetExpr(Expr.Set expr) {
+        Object object = evaluate(expr.object);
+        if (!(object instanceof JLangInstance)) {
+            throw new RuntimeError(expr.name, "Only instances have fields.");
+        }
+        Object value = evaluate(expr.value);
+        ((JLangInstance)object).set(expr.name, value);
+        return value;
+    }
 
     public void executeBlock(List<Stmt> statements,
         Environment environment) {
