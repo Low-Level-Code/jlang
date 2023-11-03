@@ -9,7 +9,7 @@ import tokenizer.Token;
 
 public class Environment {
 
-    final Environment enclosing;
+    public final Environment enclosing;
     public final Map<String, Object> values = new HashMap<>();
     public final Map<String, Object> constants = new HashMap<>();
     

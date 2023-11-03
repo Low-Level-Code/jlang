@@ -241,7 +241,12 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             "A class can't inherit from itself.");
         }
         if (stmt.superclass != null) {
+            currentClass = ClassType.SUBCLASS;
             resolve(stmt.superclass);
+        }
+        if (stmt.superclass != null) {
+            beginScope();
+            scopes.peek().put(JLangClass.CLASS_SUPER_INSTANCE_NAME, true);
         }
         beginScope();
         scopes.peek().put(JLangClass.CLASS_INNER_INSTANCE_NAME, true);
@@ -253,6 +258,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             resolveFunction(method, declaration);
         }
         endScope();
+        if (stmt.superclass != null) endScope();
         currentClass = enclosingClass;
         return null;
     }
@@ -267,6 +273,19 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     public Void visitSetExpr(Expr.Set expr) {
         resolve(expr.value);
         resolve(expr.object);
+        return null;
+    }
+
+    @Override
+    public Void visitSuperExpr(Expr.Super expr) {
+        if (currentClass == ClassType.NONE) {
+            JLang.error(expr.keyword,
+            "Can't use "+JLangClass.CLASS_SUPER_INSTANCE_NAME+" outside of a class.");
+        } else if (currentClass != ClassType.SUBCLASS) {
+            JLang.error(expr.keyword,
+            "Can't use "+JLangClass.CLASS_SUPER_INSTANCE_NAME+" in a class with no superclass.");
+        }
+        resolveLocal(expr, expr.keyword);
         return null;
     }
 

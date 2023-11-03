@@ -382,6 +382,11 @@ public class Interpreter implements Expr.Visitor<Object>,
             }
         }
         environment.define(stmt.name.lexeme, null);
+        if (stmt.superclass != null) {
+            environment = new Environment(environment);
+            environment.define(JLangClass.CLASS_SUPER_INSTANCE_NAME, superclass);
+        }
+            
         Map<String, JLangFunction> methods = new HashMap<>();
         for (Stmt.Function method : stmt.methods) {
             JLangFunction function = new JLangFunction(method, environment,method.name.lexeme.equals(JLangClass.CLASS_INITIALIZATION_FUNCTION_NAME));
@@ -389,6 +394,11 @@ public class Interpreter implements Expr.Visitor<Object>,
         }
         JLangClass klass = new JLangClass(stmt.name.lexeme,
             (JLangClass)superclass, methods);
+
+        if (superclass != null) {
+            environment = environment.enclosing;
+        }
+                
         environment.assign(stmt.name, klass);
         return null;
     }
@@ -411,6 +421,22 @@ public class Interpreter implements Expr.Visitor<Object>,
         Object value = evaluate(expr.value);
         ((JLangInstance)object).set(expr.name, value);
         return value;
+    }
+    @Override
+    public Object visitSuperExpr(Expr.Super expr) {
+        int distance = locals.get(expr);
+        JLangClass superclass = (JLangClass)environment.getAt(
+        distance, JLangClass.CLASS_SUPER_INSTANCE_NAME);
+        JLangInstance object = (JLangInstance)environment.getAt(
+        distance - 1, JLangClass.CLASS_INNER_INSTANCE_NAME);
+        
+        JLangFunction method = superclass.findMethod(expr.method.lexeme);
+        if (method == null) {
+            throw new RuntimeError(expr.method,
+                "Undefined property '" + expr.method.lexeme + "'.");
+        }
+        return method.bind(object);
+
     }
     @Override
     public Object visitThisExpr(Expr.This expr) {

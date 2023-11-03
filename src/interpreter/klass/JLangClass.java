@@ -12,13 +12,14 @@ public class JLangClass implements JLangCallable {
     final JLangClass superclass;
     public static final String CLASS_INITIALIZATION_FUNCTION_NAME = "init";
     public static final String CLASS_INNER_INSTANCE_NAME = "this";
+    public static final String CLASS_SUPER_INSTANCE_NAME = "super";
     
     public JLangClass(String name, JLangClass superclass, Map<String, JLangFunction> methods) {
         this.name = name;
         this.methods = methods;
         this.superclass = superclass;
     }
-    JLangFunction findMethod(String name) {
+    public JLangFunction findMethod(String name) {
         if (superclass != null) {
             return superclass.findMethod(name);
         }
