@@ -353,7 +353,7 @@ public class Interpreter implements Expr.Visitor<Object>,
     }
     @Override
     public Void visitFunctionStmt(Stmt.Function stmt) {
-        JLangFunction function = new JLangFunction(stmt, environment);
+        JLangFunction function = new JLangFunction(stmt, environment, false);
         environment.define(stmt.name.lexeme, function);
         return null;
     }
@@ -373,8 +373,22 @@ public class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
+        Object superclass = null;
+        if (stmt.superclass != null) {
+            superclass = evaluate(stmt.superclass);
+            if (!(superclass instanceof JLangClass)) {
+                throw new RuntimeError(stmt.superclass.name,
+            "Superclass must be a class.");
+            }
+        }
         environment.define(stmt.name.lexeme, null);
-        JLangClass klass = new JLangClass(stmt.name.lexeme);
+        Map<String, JLangFunction> methods = new HashMap<>();
+        for (Stmt.Function method : stmt.methods) {
+            JLangFunction function = new JLangFunction(method, environment,method.name.lexeme.equals(JLangClass.CLASS_INITIALIZATION_FUNCTION_NAME));
+            methods.put(method.name.lexeme, function);
+        }
+        JLangClass klass = new JLangClass(stmt.name.lexeme,
+            (JLangClass)superclass, methods);
         environment.assign(stmt.name, klass);
         return null;
     }
@@ -398,6 +412,11 @@ public class Interpreter implements Expr.Visitor<Object>,
         ((JLangInstance)object).set(expr.name, value);
         return value;
     }
+    @Override
+    public Object visitThisExpr(Expr.This expr) {
+        return lookUpVariable(expr.keyword, expr);
+    }
+
 
     public void executeBlock(List<Stmt> statements,
         Environment environment) {

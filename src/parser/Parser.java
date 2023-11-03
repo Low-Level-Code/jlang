@@ -77,6 +77,7 @@ public class Parser {
         if (match(NUMBER, STRING)) {
            return new Expr.Literal(previous().literal);
         }
+        if (match(THIS)) return new Expr.This(previous());
         if (match(IDENTIFIER)) {
             return new Expr.Variable(previous());
         }   
@@ -342,7 +343,7 @@ public class Parser {
     } 
     private Stmt tryCatchStatement() {
         Stmt tryBlock = statement();
-    
+        Stmt finallyBlock = null;
         List<Catch> catchBlocks = new ArrayList<>();
         while (match(CATCH)) {
             consume(LEFT_PAREN, "Expect '(' after 'catch'.");
@@ -352,8 +353,11 @@ public class Parser {
             Stmt catchBlock = statement();
             catchBlocks.add(new Stmt.Catch(exceptionType, variable, catchBlock));
         }
+        if(match(FINALLY)){
+            finallyBlock = statement();
+        }
     
-        return new Stmt.TryCatch(tryBlock, catchBlocks);
+        return new Stmt.TryCatch(tryBlock, catchBlocks, finallyBlock);
     }
     private Stmt returnStatement() {
         Token keyword = previous();
@@ -435,13 +439,18 @@ public class Parser {
     }
     private Stmt classDeclaration() {
         Token name = consume(IDENTIFIER, "Expect class name.");
+        Expr.Variable superclass = null;
+        if (match(LESS)) {
+            consume(IDENTIFIER, "Expect superclass name.");
+            superclass = new Expr.Variable(previous());
+        }
         consume(LEFT_BRACE, "Expect '{' before class body.");
         List<Stmt.Function> methods = new ArrayList<>();
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
             methods.add(function("method"));
         }
         consume(RIGHT_BRACE, "Expect '}' after class body.");
-        return new Stmt.Class(name, methods);
+        return new Stmt.Class(name, superclass, methods);
     }
         
     private Stmt declaration() {

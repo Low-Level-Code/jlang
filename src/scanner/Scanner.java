@@ -34,6 +34,7 @@ public class Scanner {
         keywords.put("this", THIS);
         keywords.put("try", TRY);
         keywords.put("catch", CATCH);
+        keywords.put("finally", FINALLY);
         keywords.put("true", TRUE);
         keywords.put("const", CONST);
         keywords.put("var", VAR);

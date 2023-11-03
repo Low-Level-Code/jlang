@@ -12,7 +12,7 @@ public enum TokenType {
     // Literals.
     IDENTIFIER, STRING, NUMBER,
     // Errors
-    TRY, CATCH,
+    TRY, CATCH,FINALLY,
     // Keywords.
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
     PRINT, RETURN, SUPER, THIS, TRUE, CONST, VAR, WHILE, BREAK, CONTINUE,

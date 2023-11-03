@@ -3,6 +3,7 @@ package interpreter.klass;
 import java.util.List;
 
 import interpreter.Interpreter;
+import interpreter.callable.JLangFunction;
 import interpreter.errors.RuntimeError;
 import tokenizer.Token;
 
@@ -26,6 +27,10 @@ public class JLangInstance {
         if (fields.containsKey(name.lexeme)) {
             return fields.get(name.lexeme);
         }
+
+        JLangFunction method = klass.findMethod(name.lexeme);
+        if (method != null) return method.bind(this);
+
         throw new RuntimeError(name, "Undefined property '" + name.lexeme + "'.");
     }
     

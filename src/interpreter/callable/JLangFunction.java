@@ -7,16 +7,26 @@ import ast.Stmt.Return;
 import enivirement.Environment;
 import interpreter.Interpreter;
 import interpreter.exceptions.ReturnException;
+import interpreter.klass.JLangClass;
+import interpreter.klass.JLangInstance;
 
 public class JLangFunction implements JLangCallable{
     
     private final Stmt.Function declaration;
     private final Environment closure;
+    private final boolean isInitializer;
 
 
-    public JLangFunction(Stmt.Function declaration, Environment closure) {
+    public JLangFunction(Stmt.Function declaration, Environment closure,
+                Boolean isInitializer) {
         this.declaration = declaration;
         this.closure = closure;
+        this.isInitializer = isInitializer;
+    }
+    public JLangFunction bind(JLangInstance instance) {
+        Environment environment = new Environment(closure);
+        environment.define(JLangClass.CLASS_INNER_INSTANCE_NAME, instance); 
+        return new JLangFunction(declaration, environment, isInitializer);
     }
     @Override
     public int arity() {
@@ -39,8 +49,10 @@ public class JLangFunction implements JLangCallable{
         try {
             interpreter.executeBlock(declaration.body, environment);
         } catch (ReturnException returnValue) { // if a return statement exists we quite the function right away
+            if (isInitializer) return closure.getAt(0, JLangClass.CLASS_INNER_INSTANCE_NAME);
             return returnValue.value;
         }
+        if (isInitializer) return closure.getAt(0, JLangClass.CLASS_INNER_INSTANCE_NAME);
         return null;
     }
 }

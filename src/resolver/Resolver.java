@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import interpreter.Interpreter;
+import interpreter.klass.JLangClass;
 import main.JLang;
 import tokenizer.Token;
 import ast.Expr;
@@ -17,7 +18,7 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     private final Stack<Map<String, Boolean>> scopes = new Stack<>();
     private FunctionType currentFunction = FunctionType.NONE;
     private int loopDepth = 0;
-
+    private ClassType currentClass = ClassType.NONE;
 
     public Resolver(Interpreter interpreter) {
         this.interpreter = interpreter;
@@ -173,6 +174,11 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         }
             
         if (stmt.value != null) {
+            if (currentFunction == FunctionType.INITIALIZER) {
+                JLang.error(stmt.keyword,
+                "Can't return a value from an initializer.");
+            }
+                
             if ( currentFunction == FunctionType.FUNCTION || currentFunction == FunctionType.LAMBDA ) {
                 resolve(stmt.value);
             } else {
@@ -225,8 +231,29 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
     }
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
+        ClassType enclosingClass = currentClass;
+        currentClass = ClassType.CLASS;
         declare(stmt.name);
         define(stmt.name);
+        if (stmt.superclass != null &&
+            stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) {
+            JLang.error(stmt.superclass.name,
+            "A class can't inherit from itself.");
+        }
+        if (stmt.superclass != null) {
+            resolve(stmt.superclass);
+        }
+        beginScope();
+        scopes.peek().put(JLangClass.CLASS_INNER_INSTANCE_NAME, true);
+        for (Stmt.Function method : stmt.methods) {
+            FunctionType declaration = FunctionType.METHOD;
+            if (method.name.lexeme.equals(JLangClass.CLASS_INITIALIZATION_FUNCTION_NAME)) {
+                declaration = FunctionType.INITIALIZER;
+            }
+            resolveFunction(method, declaration);
+        }
+        endScope();
+        currentClass = enclosingClass;
         return null;
     }
 
@@ -295,6 +322,16 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             resolve(stmt.finallyBlock);
         }
 
+        return null;
+    }
+    @Override
+    public Void visitThisExpr(Expr.This expr) {
+        if (currentClass == ClassType.NONE) {
+            JLang.error(expr.keyword,
+            "Can't use 'this' outside of a class.");
+            return null;
+        }
+        resolveLocal(expr, expr.keyword);
         return null;
     }
 

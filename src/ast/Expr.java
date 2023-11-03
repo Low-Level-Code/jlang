@@ -13,6 +13,7 @@ public abstract class Expr {
 		R visitLiteralExpr(Literal expr);
 		R visitLogicalExpr(Logical expr);
 		R visitSetExpr(Set expr);
+		R visitThisExpr(This expr);
 		R visitUnaryExpr(Unary expr);
 		R visitBlockExpr(Block expr);
 		R visitCommaExpr(Comma expr);
@@ -135,6 +136,18 @@ public abstract class Expr {
 		public final Expr object;
 		public final Token name;
 		public final Expr value;
+	}
+	public static class This extends Expr {
+		public This(Token keyword) {
+			this.keyword = keyword;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitThisExpr(this);
+		}
+
+		public final Token keyword;
 	}
 	public static class Unary extends Expr {
 		public Unary(Token operator, Expr right) {
