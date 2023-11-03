@@ -1,14 +1,14 @@
-// fun makeCounter() {
-//     var i = 0;
-//     var count = fun () {
-//         i = i + 1;
-//         print i;
-//     };
-//     return count;
-// }
-// var counter = makeCounter();
-// counter(); // "1".
-// counter(); // "2".
+fun makeCounter() {
+    var i = 0;
+    var life = fun (){
+        print "life is good";
+    };
+    // var ff = fun (){
+    // };
+    return life;
+}
+var lifeIsGood = makeCounter();
+lifeIsGood();
 
 var i = 1;
 while (i < 20) {
