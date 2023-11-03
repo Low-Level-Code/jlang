@@ -15,6 +15,7 @@ import ast.Stmt.Return;
 import enivirement.Environment;
 import interpreter.builtins.methods.AbsFunc;
 import interpreter.builtins.methods.ClockFun;
+import interpreter.builtins.methods.InputFunc;
 import interpreter.builtins.methods.LenFunc;
 import interpreter.builtins.methods.MaxFunc;
 import interpreter.builtins.methods.MinFunc;
@@ -22,6 +23,7 @@ import interpreter.builtins.methods.PrintFunc;
 import interpreter.builtins.methods.RandFunc;
 import interpreter.builtins.methods.RangeFunc;
 import interpreter.builtins.methods.RoundFunc;
+import interpreter.builtins.methods.SprintFunc;
 import interpreter.builtins.methods.SqrtFunc;
 import interpreter.builtins.methods.SumFunc;
 import interpreter.builtins.methods.TypeOfFunc;
@@ -59,6 +61,8 @@ public class Interpreter implements Expr.Visitor<Object>,
         globals.define("shw", new PrintFunc());
         globals.define("type", new TypeOfFunc());
         globals.define("rand", new RandFunc());
+        globals.define("input", new InputFunc());
+        globals.define("sprint", new SprintFunc());
     }
 
 
