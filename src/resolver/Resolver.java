@@ -8,6 +8,7 @@ import interpreter.Interpreter;
 import interpreter.klass.JLangClass;
 import main.JLang;
 import tokenizer.Token;
+import tokenizer.TokenType;
 import ast.Expr;
 import ast.Stmt;
 

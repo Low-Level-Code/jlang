@@ -156,9 +156,10 @@ public class Parser {
         return expr;
     }
 
+
     private Expr term() {
         Expr expr = factor();
-        while (match(MINUS, PLUS)) {
+        while (match(MINUS, PLUS, SHIFT_LEFT, SHIFT_RIGHT)) {
             Token operator = previous();
             Expr right = factor();
             expr = new Expr.Binary(expr, operator, right);
@@ -215,22 +216,28 @@ public class Parser {
     }
         
     private Expr assignment() {
-        // Expr expr = equality();
-        // Expr expr = ternary(); // to allow tenary operations
         Expr expr = or();
-        if (match(EQUAL)) {
-            Token equals = previous();
-            Expr value = assignment();
-            if (expr instanceof Expr.Variable) {
-                Token name = ((Expr.Variable)expr).name;
-                return new Expr.Assign(name, value);
-            } else if (expr instanceof Expr.Get) {
-                Expr.Get get = (Expr.Get)expr;
-                return new Expr.Set(get.object, get.name, value);
+        if (match(EQUAL, PLUS_EQUAL, MINUS_EQUAL, STAR_EQUAL, SLASH_EQUAL, SHIFT_LEFT_EQUAL, SHIFT_RIGHT_EQUAL)) {
+        Token operator = previous();
+        Expr value = assignment();
+
+        if (expr instanceof Expr.Variable) {
+            Token name = ((Expr.Variable)expr).name;
+            if (operator.type != TokenType.EQUAL) {
+                // For compound operators, we read the current value of the variable and apply the operator.
+                expr = new Expr.Binary(new Expr.Variable(name), operator, value);
             }
-            error(equals, "Invalid assignment target.");
+            return new Expr.Assign(name, value, operator);
+        } else if (expr instanceof Expr.Get) {
+            Expr.Get get = (Expr.Get)expr;
+            if (operator.type != TokenType.EQUAL) {
+                value = new Expr.Binary(new Expr.Get(get.object, get.name), operator, value);
+            }
+            return new Expr.Set(get.object, get.name, value);
         }
-        return expr;
+        error(operator, "Invalid assignment target.");
+    }
+    return expr;
     }
 
     private Expr comma() {

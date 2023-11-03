@@ -71,7 +71,7 @@ public class GenerateAST {
         String outputDir = "F:\\Pro Documents\\Low Level Code\\repos\\jlang\\src\\ast";
         
         defineAst(outputDir, "Expr", Arrays.asList(
-            "Assign : Token name, Expr value",
+            "Assign : Token name, Expr value, Token operator",
             "Binary : Expr left, Token operator, Expr right",
             "Grouping : Expr expression",
             "Get : Expr object, Token name",

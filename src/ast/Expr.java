@@ -24,9 +24,10 @@ public abstract class Expr {
 		R visitLambdaFunctionExpr(LambdaFunction expr);
 	}
 	public static class Assign extends Expr {
-		public Assign(Token name, Expr value) {
+		public Assign(Token name, Expr value, Token operator) {
 			this.name = name;
 			this.value = value;
+			this.operator = operator;
 		}
 
 		@Override
@@ -36,6 +37,7 @@ public abstract class Expr {
 
 		public final Token name;
 		public final Expr value;
+		public final Token operator;
 	}
 	public static class Binary extends Expr {
 		public Binary(Expr left, Token operator, Expr right) {

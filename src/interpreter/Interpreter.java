@@ -154,6 +154,17 @@ public class Interpreter implements Expr.Visitor<Object>,
             case STAR:
                 checkNumberOperands(expr.operator, left, right);
                return (double)left * (double)right;
+            case SHIFT_LEFT:
+               checkNumberOperands(expr.operator, left, right);
+               int leftIntShift = ((Double) left).intValue();
+               int rightIntShift = ((Double) right).intValue();
+               return leftIntShift << rightIntShift;
+            case SHIFT_RIGHT:
+                checkNumberOperands(expr.operator, left, right);
+                int leftIntRightShift = ((Double) left).intValue();
+                int rightIntRightShift = ((Double) right).intValue();
+                return leftIntRightShift >> rightIntRightShift;
+
         }
         // Unreachable.
         return null;
@@ -278,12 +289,64 @@ public class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Object visitAssignExpr(Expr.Assign expr) {
         Object value = evaluate(expr.value);
+    
+        // Check if it's a compound assignment and retrieve the current value.
+        if (expr.operator != null) {
+            Object currentValue = null;
+            Integer distance = locals.get(expr);
+            if (distance != null) {
+                currentValue = environment.getAt(distance, expr.name.lexeme);
+            } else {
+                currentValue = globals.get(expr.name);
+            }
+    
+            switch (expr.operator.type) {
+                case PLUS_EQUAL:
+                    checkNumberOperands(expr.operator, currentValue, value);
+                    value = (double)currentValue + (double)value;
+                    break;
+                case MINUS_EQUAL:
+                    checkNumberOperands(expr.operator, currentValue, value);
+                    value = (double)currentValue - (double)value;
+                    break;
+                case STAR_EQUAL:
+                    checkNumberOperands(expr.operator, currentValue, value);
+                    value = (double)currentValue * (double)value;
+                    break;
+                case SLASH_EQUAL:
+                    checkNumberOperands(expr.operator, currentValue, value);
+                    if ((double)value == 0) {
+                        throw new RuntimeError(expr.operator, "Division by zero.");
+                    }
+                    value = (double)currentValue / (double)value;
+                    break;
+                case SHIFT_LEFT_EQUAL:
+                    checkNumberOperands(expr.operator, currentValue, value);
+                    int leftShiftValue = ((Number) currentValue).intValue();
+                    int rightShiftValue = ((Number) value).intValue();
+                    value = leftShiftValue << rightShiftValue;
+                    break;
+                case SHIFT_RIGHT_EQUAL:
+                    checkNumberOperands(expr.operator, currentValue, value);
+                    int rightShiftLeftValue = ((Number) currentValue).intValue();
+                    int rightShiftRightValue = ((Number) value).intValue();
+                    value = rightShiftLeftValue >> rightShiftRightValue;
+                    break;
+                case EQUAL:break;
+                // Add cases for other operators if any
+                default:
+                    throw new RuntimeError(expr.operator, "Invalid assignment operator.");
+            }
+        }
+    
+        // Now perform the assignment with the (possibly) modified value.
         Integer distance = locals.get(expr);
         if (distance != null) {
             environment.assignAt(distance, expr.name, value);
         } else {
             globals.assign(expr.name, value);
         }
+    
         return value;
     }
 

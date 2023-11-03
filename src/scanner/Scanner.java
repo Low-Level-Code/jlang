@@ -131,22 +131,22 @@ public class Scanner {
             case '}':addToken(RIGHT_BRACE);break;
             case ',':addToken(COMMA);break;
             case '.':addToken(DOT);break;
-            case '-':addToken(match('-') ? DECREMENT : MINUS);break;
-            case '+':addToken(match('+') ? INCREMENT : PLUS);break;
+            case '-':addToken(match('-') ? DECREMENT : (match('=') ? MINUS_EQUAL : MINUS));break;
+            case '+':addToken(match('+') ? INCREMENT : (match('=') ? PLUS_EQUAL : PLUS ));break;
             case ';':addToken(SEMICOLON);break;
-            case '*':addToken(STAR);break;
+            case '*':addToken(match('=') ? STAR_EQUAL:STAR);break;
             case '!':addToken(match('=') ? BANG_EQUAL : BANG);break;
             case '?':addToken(QUESTION_MARK);break; // fot the tenary operation
             case ':':addToken(COLON);break; // fot the tenary operation
             case '=':addToken(match('=') ? EQUAL_EQUAL : EQUAL);break;
-            case '<':addToken(match('=') ? LESS_EQUAL : LESS);break;
-            case '>':addToken(match('=') ? GREATER_EQUAL : GREATER);break;
+            case '<':addToken(match('=') ? LESS_EQUAL : (match('<') ? (match('=') ? SHIFT_LEFT_EQUAL : SHIFT_LEFT) : LESS));break;
+            case '>':addToken(match('=') ? GREATER_EQUAL : (match('>') ? (match('=') ? SHIFT_RIGHT_EQUAL: SHIFT_RIGHT) : GREATER));break;
             case '/':
                 if (match('/')) {
                     // A comment goes until the end of the line.
                     while (peek() != '\n' && !isAtEnd()) advance();
                 } else {
-                    addToken(SLASH);
+                    addToken(match('=') ? SLASH_EQUAL : SLASH);
                 }
                 break;
             case ' ':
