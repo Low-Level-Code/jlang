@@ -48,17 +48,15 @@ class A {
     }
 }
 
-class B : A{
+class B {
     init(){
-        super.init();
         print "b";
     }
     bmethod(){
         print "bmethod";
     }
 }
-
-class C : B {
+class C ( B, A) {
     init(){
         super.init();
         print "c";
@@ -67,11 +65,18 @@ class C : B {
         print "cmethod";
     }
 }
-
-
+var D = class : A, B, C {
+    init(){
+        print("d");
+    }
+};
+print("classes");
 var a = A();
 var b = B();
 var c = C();
+
+var d = D();
+d.cmethod();
 c.amethod();
-b.amethod();
-c.amethod();
+c.bmethod();
+c.cmethod();

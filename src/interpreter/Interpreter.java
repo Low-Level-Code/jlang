@@ -535,25 +535,39 @@ public class Interpreter implements Expr.Visitor<Object>,
         return null;
     }
 
-    // @Override
-    // public Object visitAnonymousClassExpr(Expr.AnonymousClass expr) {
-    //     // Handle multiple parents, if any
-    //     List<JLangClass> parentClasses = new ArrayList<>();
-    //     for (Expr.Variable parent : expr.parents) {
-    //         Object evaluatedParent = evaluate(parent);
-    //         if (!(evaluatedParent instanceof JLangClass)) {
-    //             throw new RuntimeError("Each parent must be a class.");
-    //         }
-    //         parentClasses.add((JLangClass)evaluatedParent);
-    //     }
+    @Override
+    public Object visitAnonymousClassExpr(Expr.AnonymousClass expr) {
+        // Resolve the superclasses
+        List<JLangClass> superclasses = new ArrayList<>();
+        for (Expr.Variable superclassExpr : expr.parents) {
+            Object superclass = evaluate(superclassExpr);
+            if (!(superclass instanceof JLangClass)) {
+                throw new RuntimeError(superclassExpr.name, "Superclass must be a class.");
+            }
+            superclasses.add((JLangClass)superclass);
+        }
 
-    //     // Create the class definition with the provided methods
-    //     // This is a simplified version; actual multiple inheritance is more complex
-    //     JLangClass anonymousClass = new JLangClass(null, parentClasses, methods);
-        
-    //     // Return the anonymous class instance
-    //     return anonymousClass;
-    // }
+        // Define methods
+        Map<String, JLangFunction> methods = new HashMap<>();
+        for (Stmt.Function method : expr.methods) {
+            JLangFunction function = new JLangFunction(method, environment, false);
+            methods.put(method.name.lexeme, function);
+        }
+
+        // Merge methods from superclasses
+        for (JLangClass superclass : superclasses) {
+            for (Map.Entry<String, JLangFunction> method : superclass.methods.entrySet()) {
+                methods.putIfAbsent(method.getKey(), method.getValue());
+            }
+        }
+
+        // Create the anonymous class
+        String anonymousName = "AnonymousClass";// + generateUniqueIdentifier();
+        JLangClass anonymousClass = new JLangClass(anonymousName, superclasses, methods);
+
+        // Return a new instance of the anonymous class
+        return anonymousClass;
+    }
 
     @Override
     public Object visitGetExpr(Expr.Get expr) {

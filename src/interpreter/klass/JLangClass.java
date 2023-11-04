@@ -8,7 +8,7 @@ import interpreter.callable.JLangCallable;
 import interpreter.callable.JLangFunction;
 public class JLangClass implements JLangCallable {
     final String name;
-    private final Map<String, JLangFunction> methods;
+    public final Map<String, JLangFunction> methods;
     private final List<JLangClass> superclasses;
     public static final String CLASS_INITIALIZATION_FUNCTION_NAME = "init";
     public static final String CLASS_INNER_INSTANCE_NAME = "this";

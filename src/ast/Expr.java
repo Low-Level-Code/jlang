@@ -295,7 +295,8 @@ public abstract class Expr {
 		public final List<Stmt> body;
 	}
 	public static class AnonymousClass extends Expr {
-		public AnonymousClass(List<Expr.Variable> parents, List<Stmt.Function> methods) {
+		public AnonymousClass(Token name, List<Expr.Variable> parents, List<Stmt.Function> methods) {
+			this.name = name;
 			this.parents = parents;
 			this.methods = methods;
 		}
@@ -305,6 +306,7 @@ public abstract class Expr {
 			return visitor.visitAnonymousClassExpr(this);
 		}
 
+		public final Token name;
 		public final List<Expr.Variable> parents;
 		public final List<Stmt.Function> methods;
 	}

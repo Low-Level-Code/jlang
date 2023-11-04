@@ -81,7 +81,6 @@ public class Parser {
 
     private Expr classExpression() {
         List<Expr.Variable> parents = new ArrayList<>();
-        consume(LEFT_BRACE, "Expect '{' before class body.");
     
         // Check for optional parent list
         if (match(LEFT_PAREN)) {
@@ -91,7 +90,13 @@ public class Parser {
     
             consume(RIGHT_PAREN, "Expect ')' after parent classes.");
         }
-    
+        if (match(COLON)) {
+            do {
+                parents.add(new Expr.Variable(consume(IDENTIFIER, "Expect parent class name.")));
+            } while (match(COMMA));
+        }
+
+        consume(LEFT_BRACE, "Expect '{' before class body.");
         List<Stmt.Function> methods = new ArrayList<>();
         while (!check(RIGHT_BRACE) && !isAtEnd()) {
             methods.add(function("method"));
@@ -99,7 +104,7 @@ public class Parser {
         consume(RIGHT_BRACE, "Expect '}' after class body.");
     
         // Return an anonymous class expression with potential multiple parents
-        return new Expr.AnonymousClass(parents, methods);
+        return new Expr.AnonymousClass(new Token(TokenType.CLASS, "anonymous",null, 0),parents, methods);
     }
     private Expr primary() {
         // if (match(LEFT_BRACE)) return block(); // Block implementation
@@ -507,10 +512,17 @@ public class Parser {
         List<Stmt> body = block();
         return new Stmt.Function(name, parameters, body);
     }
-    
+
     private Stmt classDeclaration() {
         Token name = consume(IDENTIFIER, "Expect class name.");
         List<Expr.Variable> superclasses = new ArrayList<>();
+        if (match(LEFT_PAREN)) {
+            do {
+                superclasses.add(new Expr.Variable(consume(IDENTIFIER, "Expect parent class name.")));
+            } while (match(COMMA));
+    
+            consume(RIGHT_PAREN, "Expect ')' after parent classes.");
+        }
         if (match(COLON)) {  // Assuming COLON as the token that introduces superclasses
             do {
                 consume(IDENTIFIER, "Expect superclass name.");

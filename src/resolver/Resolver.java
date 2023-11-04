@@ -288,6 +288,28 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         currentClass = enclosingClass;
         return null;
     }
+    @Override
+    public Void visitAnonymousClassExpr(Expr.AnonymousClass expr) {
+        // Resolve the superclasses
+        for (Expr superclass : expr.parents) {
+            resolve(superclass);
+        }
+        // Begin a new scope for the class body
+        beginScope();
+    
+        // Define a new scope for the class's methods
+        beginScope();
+        for (Stmt.Function method : expr.methods) {
+            declare(method.name);
+            define(method.name);
+            resolveFunction(method, FunctionType.METHOD);
+        }
+        // End the scope for the class's methods
+        endScope();
+        // End the scope for the class body
+        endScope();
+        return null;
+    }
 
     @Override
     public Void visitGetExpr(Expr.Get expr) {

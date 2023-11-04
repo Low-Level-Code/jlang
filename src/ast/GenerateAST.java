@@ -91,7 +91,7 @@ public class GenerateAST {
             "Variable : Token name",
             "LambdaFunction : Token name, List<Token> params," +
                                     " List<Stmt> body",
-            "AnonymousClass : List<Expr.Variable> parents, List<Stmt.Function> methods"
+            "AnonymousClass : Token name, List<Expr.Variable> parents, List<Stmt.Function> methods"
 
         ));
 
