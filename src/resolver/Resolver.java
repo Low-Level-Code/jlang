@@ -260,18 +260,17 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         currentClass = ClassType.CLASS;
         declare(stmt.name);
         define(stmt.name);
-        if (stmt.superclass != null &&
-            stmt.name.lexeme.equals(stmt.superclass.name.lexeme)) {
-            JLang.error(stmt.superclass.name,
-            "A class can't inherit from itself.");
-        }
-        if (stmt.superclass != null) {
+        if (!stmt.parents.isEmpty()) {
             currentClass = ClassType.SUBCLASS;
-            resolve(stmt.superclass);
-        }
-        if (stmt.superclass != null) {
+            for (Expr.Variable superclass : stmt.parents) {
+                resolve(superclass);
+            }
+            
             beginScope();
-            scopes.peek().put(JLangClass.CLASS_SUPER_INSTANCE_NAME, true);
+            for (Expr.Variable superclass : stmt.parents) {
+                scopes.peek().put(JLangClass.CLASS_SUPER_INSTANCE_NAME, true);
+                // This will need to be updated to support multiple superclasses in the scope
+            }
         }
         beginScope();
         scopes.peek().put(JLangClass.CLASS_INNER_INSTANCE_NAME, true);
@@ -283,7 +282,9 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
             resolveFunction(method, declaration);
         }
         endScope();
-        if (stmt.superclass != null) endScope();
+        if (!stmt.parents.isEmpty()) {
+            endScope();
+        }
         currentClass = enclosingClass;
         return null;
     }

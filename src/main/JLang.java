@@ -78,7 +78,7 @@ public class JLang {
     }
 
     public static void main(String[] args) throws IOException {
-        String filePath = "F:\\Pro Documents\\Low Level Code\\repos\\jlang\\src\\res\\test";
+        String filePath = "F:\\Pro Documents\\Low Level Code\\repos\\jlang\\src\\res\\examples\\test";
         if (filePath != ""){
             runFile(filePath);
             System.exit(64);

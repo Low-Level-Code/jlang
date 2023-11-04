@@ -1,0 +1,77 @@
+fun bench(){
+    var b = fun (){
+        var c = clock();
+        print sum(range(1,10000000));
+        print("It took "+(clock()-c));
+    };
+    return b;
+}
+// bench()();
+var bencher = bench();
+bencher();
+
+
+fun looper(){
+    for(var i = 0; i<10; ++i){
+        print sprint(i+"");
+        for(var j = 0; j<10; ++j){
+            print(j);
+        }
+    }
+}
+looper();
+
+var a = 3;
+a /= 10;
+var b = fun(){
+    return a;
+};
+print(b());
+
+print(a <= 3 ? "yes" : "no");
+var c = 10;
+c >>= 3;
+print(c);
+var arr = [1,"H","Bruh",[fun (){ shw("bruuh");},2]];
+print(arr[3][0]());
+
+var a = 1; 
+a = fun (){};
+print(a);
+
+class A {
+    init(){
+        print "a";
+    }
+    amethod(){
+        print "amethod";
+    }
+}
+
+class B : A{
+    init(){
+        super.init();
+        print "b";
+    }
+    bmethod(){
+        print "bmethod";
+    }
+}
+
+class C : B {
+    init(){
+        super.init();
+        print "c";
+    }
+    cmethod(){
+        print "cmethod";
+    }
+}
+
+
+var a = A();
+var b = B();
+var c = C();
+c.amethod();
+b.amethod();
+c.amethod();

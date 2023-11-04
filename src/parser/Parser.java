@@ -72,26 +72,40 @@ public class Parser {
         consume(RIGHT_BRACKET, "Expect ']' after array elements.");
         return new Expr.Array(elements);
     }
-    private Expr arrayAccess() {
-        Expr expr = primary();
-    
-        while (true) {
-            if (match(LEFT_BRACKET)) {
-                expr = finishArrayAccess(expr);
-            } else {
-                break;
-            }
-        }
-    
-        return expr;
-    }
+
     private Expr finishArrayAccess(Expr array) {
         Expr index = expression();
         consume(RIGHT_BRACKET, "Expect ']' after array index.");
         return new Expr.ArrayAccess(array, index);
     }
+
+    private Expr classExpression() {
+        List<Expr.Variable> parents = new ArrayList<>();
+        consume(LEFT_BRACE, "Expect '{' before class body.");
+    
+        // Check for optional parent list
+        if (match(LEFT_PAREN)) {
+            do {
+                parents.add(new Expr.Variable(consume(IDENTIFIER, "Expect parent class name.")));
+            } while (match(COMMA));
+    
+            consume(RIGHT_PAREN, "Expect ')' after parent classes.");
+        }
+    
+        List<Stmt.Function> methods = new ArrayList<>();
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            methods.add(function("method"));
+        }
+        consume(RIGHT_BRACE, "Expect '}' after class body.");
+    
+        // Return an anonymous class expression with potential multiple parents
+        return new Expr.AnonymousClass(parents, methods);
+    }
     private Expr primary() {
         // if (match(LEFT_BRACE)) return block(); // Block implementation
+        if (match(CLASS)) {
+            return classExpression();
+        }
         if (match(FUN)) {
             return lambdafunction("function");
         }
@@ -493,12 +507,15 @@ public class Parser {
         List<Stmt> body = block();
         return new Stmt.Function(name, parameters, body);
     }
+    
     private Stmt classDeclaration() {
         Token name = consume(IDENTIFIER, "Expect class name.");
-        Expr.Variable superclass = null;
-        if (match(LESS)) {
-            consume(IDENTIFIER, "Expect superclass name.");
-            superclass = new Expr.Variable(previous());
+        List<Expr.Variable> superclasses = new ArrayList<>();
+        if (match(COLON)) {  // Assuming COLON as the token that introduces superclasses
+            do {
+                consume(IDENTIFIER, "Expect superclass name.");
+                superclasses.add(new Expr.Variable(previous()));
+            } while (match(COMMA)); // Assuming COMMA is the separator for superclasses
         }
         consume(LEFT_BRACE, "Expect '{' before class body.");
         List<Stmt.Function> methods = new ArrayList<>();
@@ -506,7 +523,7 @@ public class Parser {
             methods.add(function("method"));
         }
         consume(RIGHT_BRACE, "Expect '}' after class body.");
-        return new Stmt.Class(name, superclass, methods);
+        return new Stmt.Class(name, superclasses, methods);
     }
         
     private Stmt declaration() {

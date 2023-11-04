@@ -500,35 +500,60 @@ public class Interpreter implements Expr.Visitor<Object>,
 
     @Override
     public Void visitClassStmt(Stmt.Class stmt) {
-        Object superclass = null;
-        if (stmt.superclass != null) {
-            superclass = evaluate(stmt.superclass);
-            if (!(superclass instanceof JLangClass)) {
-                throw new RuntimeError(stmt.superclass.name,
-            "Superclass must be a class.");
+        List<JLangClass> superclasses = new ArrayList<>();
+        Environment originalEnvironment = environment;
+
+        // Collect superclasses and prepare environments
+        for (Expr.Variable superclass : stmt.parents) {
+            Object superclassObject = evaluate(superclass);
+            if (!(superclassObject instanceof JLangClass)) {
+                throw new RuntimeError(superclass.name, "Superclass must be a class.");
             }
-        }
-        environment.define(stmt.name.lexeme, null);
-        if (stmt.superclass != null) {
+            superclasses.add((JLangClass)superclassObject);
+
+            // Create a new environment chain for each superclass
             environment = new Environment(environment);
-            environment.define(JLangClass.CLASS_SUPER_INSTANCE_NAME, superclass);
+            environment.define(superclass.name.lexeme, superclassObject);
         }
-            
+        environment.define("superclasses", superclasses);
+
+        // Define the class in the original environment
+        originalEnvironment.define(stmt.name.lexeme, null);
+
         Map<String, JLangFunction> methods = new HashMap<>();
         for (Stmt.Function method : stmt.methods) {
-            JLangFunction function = new JLangFunction(method, environment,method.name.lexeme.equals(JLangClass.CLASS_INITIALIZATION_FUNCTION_NAME));
+            JLangFunction function = new JLangFunction(method, environment, method.name.lexeme.equals(JLangClass.CLASS_INITIALIZATION_FUNCTION_NAME));
             methods.put(method.name.lexeme, function);
         }
-        JLangClass klass = new JLangClass(stmt.name.lexeme,
-            (JLangClass)superclass, methods);
 
-        if (superclass != null) {
-            environment = environment.enclosing;
-        }
-                
+        JLangClass klass = new JLangClass(stmt.name.lexeme, superclasses, methods);
+
+        // Revert back to the original environment
+        environment = originalEnvironment;
+        // Assign the new class to the name in the environment
         environment.assign(stmt.name, klass);
         return null;
     }
+
+    // @Override
+    // public Object visitAnonymousClassExpr(Expr.AnonymousClass expr) {
+    //     // Handle multiple parents, if any
+    //     List<JLangClass> parentClasses = new ArrayList<>();
+    //     for (Expr.Variable parent : expr.parents) {
+    //         Object evaluatedParent = evaluate(parent);
+    //         if (!(evaluatedParent instanceof JLangClass)) {
+    //             throw new RuntimeError("Each parent must be a class.");
+    //         }
+    //         parentClasses.add((JLangClass)evaluatedParent);
+    //     }
+
+    //     // Create the class definition with the provided methods
+    //     // This is a simplified version; actual multiple inheritance is more complex
+    //     JLangClass anonymousClass = new JLangClass(null, parentClasses, methods);
+        
+    //     // Return the anonymous class instance
+    //     return anonymousClass;
+    // }
 
     @Override
     public Object visitGetExpr(Expr.Get expr) {
@@ -552,18 +577,23 @@ public class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Object visitSuperExpr(Expr.Super expr) {
         int distance = locals.get(expr);
-        JLangClass superclass = (JLangClass)environment.getAt(
-        distance, JLangClass.CLASS_SUPER_INSTANCE_NAME);
-        JLangInstance object = (JLangInstance)environment.getAt(
-        distance - 1, JLangClass.CLASS_INNER_INSTANCE_NAME);
         
-        JLangFunction method = superclass.findMethod(expr.method.lexeme);
+        // The superclasses should have been stored when the subclass entered its scope
+        List<JLangClass> superclasses = (List<JLangClass>)environment.getAt(distance, "superclasses");
+
+        JLangInstance object = (JLangInstance)environment.getAt(distance - 1, JLangClass.CLASS_INNER_INSTANCE_NAME);
+
+        JLangFunction method = null;
+        for (JLangClass superclass : superclasses) {
+            method = superclass.findMethod(expr.method.lexeme);
+            if (method != null) {
+                break;
+            }
+        }
         if (method == null) {
-            throw new RuntimeError(expr.method,
-                "Undefined property '" + expr.method.lexeme + "'.");
+            throw new RuntimeError(expr.method, "Undefined method '" + expr.method.lexeme + "' for superclass.");
         }
         return method.bind(object);
-
     }
     @Override
     public Object visitThisExpr(Expr.This expr) {

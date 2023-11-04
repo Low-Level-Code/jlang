@@ -9,22 +9,30 @@ import interpreter.callable.JLangFunction;
 public class JLangClass implements JLangCallable {
     final String name;
     private final Map<String, JLangFunction> methods;
-    final JLangClass superclass;
+    private final List<JLangClass> superclasses;
     public static final String CLASS_INITIALIZATION_FUNCTION_NAME = "init";
     public static final String CLASS_INNER_INSTANCE_NAME = "this";
     public static final String CLASS_SUPER_INSTANCE_NAME = "super";
     
-    public JLangClass(String name, JLangClass superclass, Map<String, JLangFunction> methods) {
+    public JLangClass(String name, List<JLangClass> superclasses, Map<String, JLangFunction> methods) {
         this.name = name;
         this.methods = methods;
-        this.superclass = superclass;
+        this.superclasses = superclasses; // Now stores a list of superclasses
     }
+
     public JLangFunction findMethod(String name) {
-        if (superclass != null) {
-            return superclass.findMethod(name);
+        JLangFunction method = methods.get(name);
+        if (method != null) {
+            return method;
         }
-        if (methods.containsKey(name)) {
-            return methods.get(name);
+        // Check each superclass for the method
+        if (superclasses != null) {
+            for (JLangClass superclass : superclasses) {
+                method = superclass.findMethod(name);
+                if (method != null) {
+                    return method;
+                }
+            }
         }
         return null;
     }

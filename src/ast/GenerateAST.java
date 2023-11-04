@@ -90,13 +90,14 @@ public class GenerateAST {
             "Ternary : Expr condition, Expr thenExpr, Expr elseExpr",
             "Variable : Token name",
             "LambdaFunction : Token name, List<Token> params," +
-                                    " List<Stmt> body"
+                                    " List<Stmt> body",
+            "AnonymousClass : List<Expr.Variable> parents, List<Stmt.Function> methods"
 
         ));
 
         defineAst(outputDir, "Stmt", Arrays.asList(
             "Block : List<Stmt> statements", 
-            "Class : Token name, Expr.Variable superclass," +
+            "Class : Token name, List<Expr.Variable> parents," +
                     " List<Stmt.Function> methods",
             "Expression : Expr expression",
             "Function : Token name, List<Token> params," +

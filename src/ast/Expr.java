@@ -24,6 +24,7 @@ public abstract class Expr {
 		R visitTernaryExpr(Ternary expr);
 		R visitVariableExpr(Variable expr);
 		R visitLambdaFunctionExpr(LambdaFunction expr);
+		R visitAnonymousClassExpr(AnonymousClass expr);
 	}
 	public static class Assign extends Expr {
 		public Assign(Token name, Expr value, Token operator) {
@@ -292,6 +293,20 @@ public abstract class Expr {
 		public final Token name;
 		public final List<Token> params;
 		public final List<Stmt> body;
+	}
+	public static class AnonymousClass extends Expr {
+		public AnonymousClass(List<Expr.Variable> parents, List<Stmt.Function> methods) {
+			this.parents = parents;
+			this.methods = methods;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitAnonymousClassExpr(this);
+		}
+
+		public final List<Expr.Variable> parents;
+		public final List<Stmt.Function> methods;
 	}
 
 	public abstract <R> R accept(Visitor<R> visitor);
