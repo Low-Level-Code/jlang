@@ -30,6 +30,7 @@ print(b());
 
 print(a <= 3 ? "yes" : "no");
 var c = 10;
-c /= 10;
+c >>= 3;
 print(c);
-print("ayoub" << 3); // prints "ay"
+var arr = [1,2,3,4,5,6,7,8,9,10,[1,2]];
+print(arr[10]);

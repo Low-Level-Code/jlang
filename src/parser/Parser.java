@@ -62,7 +62,34 @@ public class Parser {
         if (check(type)) return advance();
         throw error(peek(), message);
     }
-
+    private Expr array() {
+        List<Expr> elements = new ArrayList<>();
+        if (!check(RIGHT_BRACKET)) {
+            do {
+                elements.add(expression());
+            } while (match(COMMA));
+        }
+        consume(RIGHT_BRACKET, "Expect ']' after array elements.");
+        return new Expr.Array(elements);
+    }
+    private Expr arrayAccess() {
+        Expr expr = primary();
+    
+        while (true) {
+            if (match(LEFT_BRACKET)) {
+                expr = finishArrayAccess(expr);
+            } else {
+                break;
+            }
+        }
+    
+        return expr;
+    }
+    private Expr finishArrayAccess(Expr array) {
+        Expr index = expression();
+        consume(RIGHT_BRACKET, "Expect ']' after array index.");
+        return new Expr.ArrayAccess(array, index);
+    }
     private Expr primary() {
         // if (match(LEFT_BRACE)) return block(); // Block implementation
         if (match(FUN)) {
@@ -86,6 +113,7 @@ public class Parser {
         if (match(IDENTIFIER)) {
             return new Expr.Variable(previous());
         }   
+        if (match(LEFT_BRACKET)) return array();
         if (match(LEFT_PAREN)) {
             Expr expr = expression();
             consume(RIGHT_PAREN, "Expect ')' after expression.");
@@ -117,6 +145,9 @@ public class Parser {
             }  else if (match(DOT)) {
                 Token name = consume(IDENTIFIER, "Expect property name after '.'.");
                 expr = new Expr.Get(expr, name);
+            } else if (match(LEFT_BRACKET)) {
+                expr = finishArrayAccess(expr);
+                // Presuming finishArrayAccess() consumes the index and the RIGHT_BRACKET.
             } else {
                 break;
             }

@@ -13,6 +13,7 @@ import ast.Stmt.Catch;
 import ast.Stmt.Print;
 import ast.Stmt.Return;
 import enivirement.Environment;
+import interpreter.array.JLangArray;
 import interpreter.builtins.methods.*;
 import interpreter.builtins.methods.math.*;
 import interpreter.callable.JLangAnonymousFunction;
@@ -348,6 +349,29 @@ public class Interpreter implements Expr.Visitor<Object>,
         }
     
         return value;
+    }
+    @Override
+    public Object visitArrayExpr(Expr.Array expr) {
+        List<Object> elements = new ArrayList<>();
+        for (Expr element : expr.elements) {
+            elements.add(evaluate(element));
+        }
+        return new JLangArray(elements);
+    }
+    @Override
+    public Object visitArrayAccessExpr(Expr.ArrayAccess expr) {
+        Object array = evaluate(expr.name);
+        Object index = evaluate(expr.index);
+        if (!(array instanceof JLangArray)) {
+            throw new RuntimeException("Only arrays are accessible by index.");
+        }
+        if(index instanceof Double){
+            index =((Double) index).intValue();
+        }else{
+            throw new RuntimeException( "Array index must be an integer.");
+        }
+
+        return ((JLangArray)array).get((Integer)index);
     }
 
     @Override

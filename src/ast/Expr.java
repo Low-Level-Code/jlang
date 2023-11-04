@@ -11,6 +11,8 @@ public abstract class Expr {
 		R visitGetExpr(Get expr);
 		R visitCallExpr(Call expr);
 		R visitLiteralExpr(Literal expr);
+		R visitArrayExpr(Array expr);
+		R visitArrayAccessExpr(ArrayAccess expr);
 		R visitLogicalExpr(Logical expr);
 		R visitSetExpr(Set expr);
 		R visitSuperExpr(Super expr);
@@ -108,6 +110,32 @@ public abstract class Expr {
 		}
 
 		public final Object value;
+	}
+	public static class Array extends Expr {
+		public Array(List<Expr> elements) {
+			this.elements = elements;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitArrayExpr(this);
+		}
+
+		public final List<Expr> elements;
+	}
+	public static class ArrayAccess extends Expr {
+		public ArrayAccess(Expr name, Expr index) {
+			this.name = name;
+			this.index = index;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitArrayAccessExpr(this);
+		}
+
+		public final Expr name;
+		public final Expr index;
 	}
 	public static class Logical extends Expr {
 		public Logical(Expr left, Token operator, Expr right) {
