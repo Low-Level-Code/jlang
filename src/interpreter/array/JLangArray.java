@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import interpreter.Interpreter;
+import interpreter.callable.JLangCallable;
 import interpreter.callable.JLangFunction;
 import interpreter.errors.RuntimeError;
 import interpreter.indexible.JLangIndexible;
@@ -92,6 +93,129 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
                 Object value = arguments.get(1);
                 setItem(index, value);
                 return null; // set doesn't return anything
+            }
+        });
+
+        defineMethod("add", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 1; }
+    
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                elements.add(arguments.get(0));
+                return null; // This method does not return anything.
+            }
+        });
+    
+        defineMethod("insert", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 2; }
+    
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                int index = ((Double) arguments.get(0)).intValue();
+                Object element = arguments.get(1);
+                elements.add(index, element);
+                return null; // This method does not return anything.
+            }
+        });
+        
+        defineMethod("removeAt", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 1; }
+
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                int index = ((Double) arguments.get(0)).intValue();
+                if (index >= 0 && index < elements.size()) {
+                    return elements.remove(index);
+                } else {
+                    throw new RuntimeError("Index out of bounds for removal.");
+                }
+            }
+        });
+
+        defineMethod("contains", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 1; }
+    
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return elements.contains(arguments.get(0));
+            }
+        });
+
+        defineMethod("indexOf", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 1; }
+    
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return (double) elements.indexOf(arguments.get(0));
+            }
+        });
+
+        defineMethod("clear", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 0; }
+    
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                elements.clear();
+                return null;
+            }
+        });
+
+        defineMethod("isEmpty", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 0; }
+    
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return elements.isEmpty();
+            }
+        });
+
+        defineMethod("toArray", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 0; }
+    
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return elements.toArray();
+            }
+        });
+
+        defineMethod("forEach", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 1; }
+        
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                JLangCallable action = (JLangCallable) arguments.get(0);
+                
+                for (Object element : elements) {
+                    action.call(interpreter, List.of(element));
+                }
+                return null;
+            }
+        });
+
+        defineMethod("filter", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 1; }
+        
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                JLangCallable predicate = (JLangCallable) arguments.get(0);
+                List<Object> filteredElements = new ArrayList<>();
+                
+                for (Object element : elements) {
+                    if ((boolean) predicate.call(interpreter, List.of(element))) {
+                        filteredElements.add(element);
+                    }
+                }
+                return new JLangArray(filteredElements);
             }
         });
 

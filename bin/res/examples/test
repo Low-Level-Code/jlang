@@ -98,3 +98,22 @@ print([1,2,3].size());
 print([1,2].get(1));
 
 print(type(""));
+print(("Hello, "+"world").get(1));
+fun test(){}
+print(type(fun (){}));
+print(type(test));
+
+fun filt(x){
+    return x > 0;
+}
+var arr = [1,2,3];
+arr.insert(0,-1);
+arr.insert(0,-2);
+arr.set(0,2);
+arr.removeAt(0);
+print arr.contains(2) ? "yes "+arr.indexOf(2) : " no ";
+print(arr.filter(fun(x){
+    return x > 0;
+}));
+print(arr);
+arr.forEach(fun(element){print element;});
