@@ -97,4 +97,4 @@ print(json.field2[4]);
 print([1,2,3].size());
 print([1,2].get(1));
 
-print(type([]));
+print(type(""));

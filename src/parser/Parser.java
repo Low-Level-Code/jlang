@@ -161,9 +161,9 @@ public class Parser {
         if (match(FALSE)) return new Expr.Literal(false);
         if (match(TRUE)) return new Expr.Literal(true);
         if (match(NIL)) return new Expr.Literal(null);
-        if (match(NUMBER, STRING)) {
+        if (match(NUMBER)) {
            return new Expr.Literal(previous().literal);
-        }
+        }if(match(STRING)){ return new Expr.JString((String)previous().literal);}
         if (match(SUPER)) {
             Token keyword = previous();
             consume(DOT, "Expect '.' after 'super'.");

@@ -239,6 +239,10 @@ public class Resolver implements Expr.Visitor<Void>, Stmt.Visitor<Void> {
         return null;
     }
     @Override
+    public Void visitJStringExpr(Expr.JString expr) {
+        return null;
+    }
+    @Override
     public Void visitLogicalExpr(Expr.Logical expr) {
         resolve(expr.left);
         resolve(expr.right);

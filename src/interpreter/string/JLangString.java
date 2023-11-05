@@ -10,6 +10,12 @@ public class JLangString implements JLangIndexible {
     }
 
     @Override
+    public String toString() {
+        // TODO Auto-generated method stub
+        return getContent();
+    }
+
+    @Override
     public Object getItem(int index) {
         return this.content.charAt(index);
     }
@@ -18,6 +24,11 @@ public class JLangString implements JLangIndexible {
     public int length() {
         return this.content.length();
     }
+
+    public String getContent() {
+        return this.content;
+    }
+
 
     // ... potentially other string methods ...
 }

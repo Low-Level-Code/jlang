@@ -29,6 +29,7 @@ import interpreter.klass.JLangBaseObject;
 import interpreter.klass.JLangClass;
 import interpreter.klass.JLangInstance;
 import interpreter.klass.JLangObject;
+import interpreter.string.JLangString;
 import main.JLang;
 import tokenizer.Token;
 import tokenizer.TokenType;
@@ -136,15 +137,15 @@ public class Interpreter implements Expr.Visitor<Object>,
                 if (left instanceof Double && right instanceof Double) {
                     return (double)left + (double)right;
                 }
-                if (left instanceof String && right instanceof String) { // yess brother you can add strings
-                    return (String)left + (String)right;
+                if (left instanceof JLangString && right instanceof JLangString) { // yess brother you can add strings
+                    return new JLangString(((JLangString) left).getContent() + ((JLangString) right).getContent());
                 }
                 // This should add the adition for a string and a number like  "100" + 5 = "1005"
-                if (left instanceof String) {
-                    return (String)left + stringify(right);
+                if (left instanceof JLangString) {
+                    return new JLangString(((JLangString)left).getContent() + stringify(right));
                 }
-                if (right instanceof String) {
-                    return stringify(left) + (String)right;
+                if (right instanceof JLangString) {
+                    return new JLangString(stringify(left) + ((JLangString)right).getContent());
                 }
                 throw new RuntimeError(expr.operator, 
                 "Operands must be two numbers or at least one string.");
@@ -220,6 +221,10 @@ public class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Object visitLiteralExpr(Expr.Literal expr) {
         return expr.value;
+    }
+    @Override
+    public Object visitJStringExpr(Expr.JString expr) {
+        return new JLangString(expr.value);
     }
 
     @Override
@@ -378,9 +383,9 @@ public class Interpreter implements Expr.Visitor<Object>,
                 throw new RuntimeException("Array of length "+ ((JLangArray)array).size() + " index "+index+" out of bounds");
             }
         }
-        if (array instanceof String) {
+        if (array instanceof JLangString) {
             try{
-                return ((String)array).charAt((int)index); 
+                return ((JLangString)array).getContent().charAt((int)index); 
             } catch (java.lang.StringIndexOutOfBoundsException e){
                 throw new RuntimeException("String of length "+ ((String)array).length()+ " index "+index+" out of bounds");
             }

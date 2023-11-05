@@ -78,6 +78,7 @@ public class GenerateAST {
             "Call : Expr callee, Token paren, List<Expr> arguments",
             "Literal : Object value",
             "Array : List<Expr> elements",
+            "JString : String value",
             "ArrayAccess : Expr name, Expr index",
             "Logical : Expr left, Token operator, Expr right",
             "Set : Expr object, Token name, Expr value",

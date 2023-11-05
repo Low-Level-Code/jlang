@@ -5,6 +5,7 @@ import java.util.MissingFormatArgumentException;
 import interpreter.Interpreter;
 import interpreter.callable.JLangCallable;
 import interpreter.errors.RuntimeError;
+import interpreter.string.JLangString;
 import main.JLang;
 import scanner.Scanner;
 
@@ -22,12 +23,12 @@ public class SprintFunc implements JLangCallable {
             throw new RuntimeException("sprint function expects at least one argument.");
         }
 
-        if (!(arguments.get(0) instanceof String)) {
+        if (!(arguments.get(0) instanceof JLangString)) {
             throw new RuntimeException("sprint function expects a string as the first argument for the format.");
         }
 
         // Extract the format string
-        String format = (String) arguments.get(0);
+        String format = ((JLangString)arguments.get(0)).getContent();
         
         // Remove the first argument (format string) so that we are left with just the values to format
         arguments.remove(0);
@@ -37,7 +38,7 @@ public class SprintFunc implements JLangCallable {
         
         // Return the formatted string
         try {
-            return String.format(format, formatValues);
+            return new JLangString(String.format(format, formatValues));
         } catch (MissingFormatArgumentException e) {
             throw new RuntimeException("Formating elements don't match");
         }
