@@ -12,6 +12,7 @@ import interpreter.indexible.JLangIndexible;
 import interpreter.klass.JLangClass;
 import interpreter.klass.JLangObject;
 import tokenizer.Token;
+import tokenizer.TokenType;
 
 public class JLangArray extends JLangClass  implements JLangObject, JLangIndexible{
     private final List<Object> elements;
@@ -203,15 +204,27 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
 
         defineMethod("filter", new JLangFunction(null, null, false) {
             @Override
-            public int arity() { return 1; }
+            public int arity() { return 1; } // filter takes a single function as an argument
         
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments) {
                 JLangCallable predicate = (JLangCallable) arguments.get(0);
                 List<Object> filteredElements = new ArrayList<>();
                 
-                for (Object element : elements) {
-                    if ((boolean) predicate.call(interpreter, List.of(element))) {
+                for (int i = 0; i < elements.size(); i++) {
+                    Object element = elements.get(i);
+                    boolean result;
+                    // Check the number of parameters the function expects
+                    if (predicate.arity() == 1) {
+                        // If the function expects one parameter, pass only the element
+                        result = (boolean) predicate.call(interpreter, List.of(element));
+                    } else if (predicate.arity() == 2) {
+                        // If the function expects two parameters, pass the index and the element
+                        result = (boolean) predicate.call(interpreter, List.of((double)i, element));
+                    } else {
+                        throw new IllegalArgumentException("Function passed to 'map' must accept either 1 or 2 parameters.");
+                    }
+                    if (result) {
                         filteredElements.add(element);
                     }
                 }
@@ -219,6 +232,115 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
+        defineMethod("map", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() { return 1; } // map takes a single function as an argument
+        
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                JLangCallable transform = (JLangCallable) arguments.get(0);
+                List<Object> mappedElements = new ArrayList<>();
+                
+                for (int i = 0; i < elements.size(); i++) {
+                    Object element = elements.get(i);
+                    Object result;
+                    // Check the number of parameters the function expects
+                    if (transform.arity() == 1) {
+                        // If the function expects one parameter, pass only the element
+                        result = transform.call(interpreter, List.of(element));
+                    } else if (transform.arity() == 2) {
+                        // If the function expects two parameters, pass the index and the element
+                        result = transform.call(interpreter, List.of((double)i, element));
+                    } else {
+                        throw new IllegalArgumentException("Function passed to 'map' must accept either 1 or 2 parameters.");
+                    }
+                    mappedElements.add(result);
+                }
+                return new JLangArray(mappedElements);
+            }
+        });
+
+        defineMethod("sort", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() {
+                return 0; // 'sort' can be called without a comparator for default behavior
+            }
+        
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                // Make a copy of the elements list to sort
+                List<Object> sortedElements = new ArrayList<>(elements);
+                sortedElements.sort((a, b) -> {
+                    // Casting or type checking should be added based on your language's capabilities
+                    Comparable comparableA = (Comparable) a;
+                    Comparable comparableB = (Comparable) b;
+                    return comparableA.compareTo(comparableB);
+                });
+                return new JLangArray(sortedElements);
+            }
+        });
+        
+        defineMethod("sortWithComparator", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() {
+                return 1; // 'sortWithComparator' takes one parameter
+            }
+        
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                JLangCallable comparator = (JLangCallable) arguments.get(0);
+                List<Object> sortedElements = new ArrayList<>(elements);
+        
+                sortedElements.sort((a, b) -> {
+                    Object result = comparator.call(interpreter, List.of(a, b));
+                    // Handle the case where the result is a Double
+                    if (result instanceof Double) {
+                        // Convert the Double to an int for comparison
+                        // assuming the double value is actually within int range and intended for comparison
+                        return (int)((Double) result).doubleValue();
+                    } else if (result instanceof Integer) {
+                        return (Integer) result;
+                    } else {
+                        // Throw an error or handle the case where the result is not a number
+                        throw new ClassCastException("Comparator must return an Integer or a Double.");
+                    }
+                });
+        
+                return new JLangArray(sortedElements);
+            }
+        });
+        
+        defineMethod("reverse", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() {
+                return 0; // 'reverse' does not take any parameters
+            }
+        
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                List<Object> reversedElements = new ArrayList<>(elements);
+                java.util.Collections.reverse(reversedElements);
+                return new JLangArray(reversedElements);
+            }
+        });
+        defineMethod("reduce", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() {
+                return 2; // reduce takes two parameters: the reducer function and the initial value
+            }
+        
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                JLangCallable reducer = (JLangCallable) arguments.get(0);
+                Object accumulator = arguments.get(1);
+                
+                for (Object element : elements) {
+                    accumulator = reducer.call(interpreter, List.of(accumulator, element));
+                }
+                
+                return accumulator;
+            }
+        });
         // Add more methods as needed
     }
     // Instance

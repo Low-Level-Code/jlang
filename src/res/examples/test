@@ -117,3 +117,14 @@ print(arr.filter(fun(x){
 }));
 print(arr);
 arr.forEach(fun(element){print element;});
+print(arr.map(fun(element){ return element * element;}));
+print(arr.map(fun(index, element){ return element * index;}));
+print(arr.reverse());
+print(arr.reverse().sort());
+var myComparator = fun(a, b) {
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+};
+print("arr with comparator "+arr.sortWithComparator(myComparator));
+print("reduce result " + arr.reduce(fun(accumulator, element){ return accumulator + element; } , 0));
