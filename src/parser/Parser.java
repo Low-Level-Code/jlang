@@ -7,6 +7,7 @@ import java.util.List;
 import ast.Expr;
 import ast.Stmt;
 import ast.Stmt.Catch;
+import ast.Stmt.Expression;
 import main.JLang;
 
 import static tokenizer.TokenType.*;
@@ -106,8 +107,51 @@ public class Parser {
         // Return an anonymous class expression with potential multiple parents
         return new Expr.AnonymousClass(new Token(TokenType.CLASS, "anonymous",null, 0),parents, methods);
     }
+
+    private Expr jsonObject() {
+        List<Token> keys = new ArrayList<>();
+        List<Expr> values = new ArrayList<>();
+    
+        // Parse key-value pairs.
+        while (!check(RIGHT_BRACE) && !isAtEnd()) {
+            Token key;
+            
+            // Parse the key which could be a string or an identifier.
+            if (match(STRING)) {
+                // If the key is a string, we remove the quotes before storing it.
+                String keyString = previous().lexeme.replaceAll("^\"|\"$", "");
+                key = new Token(TokenType.IDENTIFIER, keyString, previous().literal, previous().line);
+            } else if (match(IDENTIFIER)) {
+                // If the key is an identifier, we can use it directly.
+                key = previous();
+            } else {
+                error(peek(), "Expect string key or identifier.");
+                return null;
+            }
+            
+            keys.add(key);
+            
+            // Parse the colon separator.
+            consume(COLON, "Expect ':' after key.");
+    
+            // Parse the value.
+            Expr value = expression();
+            values.add(value);
+    
+            // Consume comma if there's another key-value pair.
+            if (!match(COMMA)) {
+                break;
+            }
+        }
+    
+        // Consume the closing brace.
+        consume(RIGHT_BRACE, "Expect '}' after object.");
+    
+        return new Expr.ObjectLiteral(keys, values);
+    }
     private Expr primary() {
         // if (match(LEFT_BRACE)) return block(); // Block implementation
+        if (match(LEFT_BRACE)) return jsonObject();
         if (match(CLASS)) {
             return classExpression();
         }

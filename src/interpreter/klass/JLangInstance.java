@@ -15,7 +15,7 @@ public class JLangInstance {
     private JLangClass klass;
     private final Map<String, Object> fields = new HashMap<>();
 
-    JLangInstance(JLangClass klass) {
+    public JLangInstance(JLangClass klass) {
         this.klass = klass;
     }
     @Override

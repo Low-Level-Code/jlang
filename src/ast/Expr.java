@@ -25,6 +25,7 @@ public abstract class Expr {
 		R visitVariableExpr(Variable expr);
 		R visitLambdaFunctionExpr(LambdaFunction expr);
 		R visitAnonymousClassExpr(AnonymousClass expr);
+		R visitObjectLiteralExpr(ObjectLiteral expr);
 	}
 	public static class Assign extends Expr {
 		public Assign(Token name, Expr value, Token operator) {
@@ -309,6 +310,20 @@ public abstract class Expr {
 		public final Token name;
 		public final List<Expr.Variable> parents;
 		public final List<Stmt.Function> methods;
+	}
+	public static class ObjectLiteral extends Expr {
+		public ObjectLiteral(List<Token> keys, List<Expr> values) {
+			this.keys = keys;
+			this.values = values;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitObjectLiteralExpr(this);
+		}
+
+		public final List<Token> keys;
+		public final List<Expr> values;
 	}
 
 	public abstract <R> R accept(Visitor<R> visitor);

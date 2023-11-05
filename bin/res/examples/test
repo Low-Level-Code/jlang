@@ -80,3 +80,17 @@ d.cmethod();
 c.amethod();
 c.bmethod();
 c.cmethod();
+
+{
+    print "method from a block of code";
+}
+
+var json = {
+    field1: fun (){print "from field 1"; return 69;},
+    "field2": "field2",
+};
+
+print(json.field1()); 
+print(json.field2); 
+print type([]);
+print(json.field2[4]);

@@ -25,6 +25,7 @@ import interpreter.errors.RuntimeError;
 import interpreter.exceptions.BreakException;
 import interpreter.exceptions.ContinueException;
 import interpreter.exceptions.ReturnException;
+import interpreter.klass.JLangBaseObject;
 import interpreter.klass.JLangClass;
 import interpreter.klass.JLangInstance;
 import main.JLang;
@@ -358,22 +359,33 @@ public class Interpreter implements Expr.Visitor<Object>,
         }
         return new JLangArray(elements);
     }
+
     @Override
     public Object visitArrayAccessExpr(Expr.ArrayAccess expr) {
         Object array = evaluate(expr.name);
         Object index = evaluate(expr.index);
-        if (!(array instanceof JLangArray)) {
-            throw new RuntimeException("Only arrays are accessible by index.");
+    
+        if (index instanceof Double) {
+            index = ((Double) index).intValue(); 
+        } else {
+            throw new RuntimeException("Array index must be an integer.");
         }
-        if(index instanceof Double){
-            index =((Double) index).intValue();
-        }else{
-            throw new RuntimeException( "Array index must be an integer.");
+        if (array instanceof JLangArray) {
+            try{
+                return ((JLangArray)array).get((Integer)index);
+            }catch(IndexOutOfBoundsException e){
+                throw new RuntimeException("Array of length "+ ((JLangArray)array).size() + " index "+index+" out of bounds");
+            }
         }
-
-        return ((JLangArray)array).get((Integer)index);
+        if (array instanceof String) {
+            try{
+                return ((String)array).charAt((int)index); 
+            } catch (java.lang.StringIndexOutOfBoundsException e){
+                throw new RuntimeException("String of length "+ ((String)array).length()+ " index "+index+" out of bounds");
+            }
+        }
+        throw new RuntimeException("Only arrays are accessible by index.");
     }
-
     @Override
     public Void visitBlockStmt(Stmt.Block stmt) {
         executeBlock(stmt.statements, new Environment(environment));
@@ -568,13 +580,27 @@ public class Interpreter implements Expr.Visitor<Object>,
         // Return a new instance of the anonymous class
         return anonymousClass;
     }
+    @Override
+    public Object visitObjectLiteralExpr(Expr.ObjectLiteral expr) {
+        // You need to get a reference to the "Object" class, which should be predefined in your environment.
+        JLangClass objectClass = (JLangClass)environment.getAt(0, "Object");
 
+        // Create a new instance of the base object class.
+        JLangBaseObject objectInstance = new JLangBaseObject(objectClass);
+
+        for (int i = 0; i < expr.keys.size(); i++) {
+            Token keyToken = expr.keys.get(i);
+            Object value = evaluate(expr.values.get(i));
+            objectInstance.set(new Token(TokenType.IDENTIFIER, keyToken.lexeme, null, keyToken.line), value);
+        }
+        return objectInstance;
+    }
     @Override
     public Object visitGetExpr(Expr.Get expr) {
         Object object = evaluate(expr.object);
         if (object instanceof JLangInstance) {
             return ((JLangInstance) object).get(expr.name);
-        }
+        } 
         throw new RuntimeError(expr.name, "Only instances have properties.");
     }
 
