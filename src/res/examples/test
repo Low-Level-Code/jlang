@@ -94,3 +94,7 @@ print(json.field1());
 print(json.field2); 
 print type([]);
 print(json.field2[4]);
+print([1,2,3].size());
+print([1,2].get(1));
+
+print(type([]));

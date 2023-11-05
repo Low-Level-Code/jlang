@@ -56,6 +56,8 @@ public class JLangClass implements JLangCallable {
         if (initializer == null) return 0;
         return initializer.arity();
     }
+    
+    public Map<String, JLangFunction> getMethods() { return methods; }
 
 }
 

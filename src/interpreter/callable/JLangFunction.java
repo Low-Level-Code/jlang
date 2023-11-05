@@ -9,6 +9,7 @@ import interpreter.Interpreter;
 import interpreter.exceptions.ReturnException;
 import interpreter.klass.JLangClass;
 import interpreter.klass.JLangInstance;
+import interpreter.klass.JLangObject;
 
 public class JLangFunction implements JLangCallable{
     
@@ -23,7 +24,7 @@ public class JLangFunction implements JLangCallable{
         this.closure = closure;
         this.isInitializer = isInitializer;
     }
-    public JLangFunction bind(JLangInstance instance) {
+    public JLangFunction bind(JLangObject instance) {
         Environment environment = new Environment(closure);
         environment.define(JLangClass.CLASS_INNER_INSTANCE_NAME, instance); 
         return new JLangFunction(declaration, environment, isInitializer);

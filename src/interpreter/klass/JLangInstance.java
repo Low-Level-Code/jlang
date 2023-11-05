@@ -10,9 +10,9 @@ import tokenizer.Token;
 import java.util.HashMap;
 import java.util.Map;
 
-public class JLangInstance {
+public class JLangInstance implements JLangObject {
 
-    private JLangClass klass;
+    public JLangClass klass;
     private final Map<String, Object> fields = new HashMap<>();
 
     public JLangInstance(JLangClass klass) {
@@ -22,6 +22,7 @@ public class JLangInstance {
     public String toString() {
         return klass.name + " instance";
     }
+
 
     public Object get(Token name) {
         if (fields.containsKey(name.lexeme)) {

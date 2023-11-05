@@ -28,6 +28,7 @@ import interpreter.exceptions.ReturnException;
 import interpreter.klass.JLangBaseObject;
 import interpreter.klass.JLangClass;
 import interpreter.klass.JLangInstance;
+import interpreter.klass.JLangObject;
 import main.JLang;
 import tokenizer.Token;
 import tokenizer.TokenType;
@@ -370,9 +371,9 @@ public class Interpreter implements Expr.Visitor<Object>,
         } else {
             throw new RuntimeException("Array index must be an integer.");
         }
-        if (array instanceof JLangArray) {
+        if (array instanceof JLangArray) { //  array indexing
             try{
-                return ((JLangArray)array).get((Integer)index);
+                return ((JLangArray)array).getItem((Integer)index);
             }catch(IndexOutOfBoundsException e){
                 throw new RuntimeException("Array of length "+ ((JLangArray)array).size() + " index "+index+" out of bounds");
             }
@@ -595,11 +596,12 @@ public class Interpreter implements Expr.Visitor<Object>,
         }
         return objectInstance;
     }
+    
     @Override
     public Object visitGetExpr(Expr.Get expr) {
         Object object = evaluate(expr.object);
-        if (object instanceof JLangInstance) {
-            return ((JLangInstance) object).get(expr.name);
+        if (object instanceof JLangObject) {
+            return ((JLangObject) object).get(expr.name);
         } 
         throw new RuntimeError(expr.name, "Only instances have properties.");
     }
