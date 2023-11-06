@@ -102,7 +102,7 @@ print(("Hello, "+"world").get(1));
 fun test(){}
 print(type(fun (){}));
 print(type(test));
-
+// Arrays
 fun filt(x){
     return x > 0;
 }
@@ -128,3 +128,41 @@ var myComparator = fun(a, b) {
 };
 print("arr with comparator "+arr.sortWithComparator(myComparator));
 print("reduce result " + arr.reduce(fun(accumulator, element){ return accumulator + element; } , 0));
+// Strings
+var str = "Hello,1 strings!";
+print(str);
+print(str.contains("Hello"));
+print(str.toUpperCase());
+print(str.toLowerCase());
+print(str.startsWith("H"));
+print(str.endsWith("!"));
+print(str.replace("e", "A"));
+print(str.trim());
+print(str.substring(0,3));
+print(str.indexOf("1"));
+print(str[-1]);print([1,2,3][-2]);
+var char = 'a';
+print(type('1' + '2'));
+print(all([1,2,3], fun(n){ return n>0;}));
+print(any([1,2,3], fun(n) { return n < 0;}));
+print(type(array("ayoub")[1]));
+print(array("achak"));
+print(map([1,2,3], fun (n){ return sqrt(n);}));
+print(filter([0,1,2,3], fun (n){ return n <= 0;}));
+print(reduce([1,2,3], fun (a, b){ return a * b;}, 1));
+
+print("ayoub".get(2));
+// print('a'.isDigit());
+print(3 ** 3 == pow(3, 3));
+var arr = [3,4,2,7,2];
+var str = "ayouble";
+print("Sorting..");
+sort(arr);
+sort(str);
+print(arr);
+print(str);
+print("Reversing..");
+reverse(arr);
+reverse(str);
+print(arr);
+print(str);

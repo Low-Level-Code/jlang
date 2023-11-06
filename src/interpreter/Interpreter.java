@@ -8,12 +8,14 @@ import java.util.Map;
 import ast.Expr;
 import ast.Expr.Block;
 import ast.Expr.Comma;
+import ast.Expr.JChar;
 import ast.Stmt;
 import ast.Stmt.Catch;
 import ast.Stmt.Print;
 import ast.Stmt.Return;
 import enivirement.Environment;
 import interpreter.array.JLangArray;
+import interpreter.builtins.ReverseFunc;
 import interpreter.builtins.methods.*;
 import interpreter.builtins.methods.math.*;
 import interpreter.callable.JLangAnonymousFunction;
@@ -25,6 +27,7 @@ import interpreter.errors.RuntimeError;
 import interpreter.exceptions.BreakException;
 import interpreter.exceptions.ContinueException;
 import interpreter.exceptions.ReturnException;
+import interpreter.jchar.JLangChar;
 import interpreter.klass.JLangBaseObject;
 import interpreter.klass.JLangClass;
 import interpreter.klass.JLangInstance;
@@ -36,7 +39,7 @@ import tokenizer.TokenType;
 
 public class Interpreter implements Expr.Visitor<Object>,
                                     Stmt.Visitor<Void> {
-
+    // TODO: All the object methods should be defined once, not each time an instance is created.
     public final Environment globals = new Environment();
     private Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
@@ -55,6 +58,7 @@ public class Interpreter implements Expr.Visitor<Object>,
         // maths
         globals.define("abs", new AbsFunc());
         globals.define("sqrt", new SqrtFunc());
+        globals.define("pow", new PowFunc());
         globals.define("round", new RoundFunc());
         globals.define("cos", new CosFunc());
         globals.define("sin", new SinFunc());
@@ -63,6 +67,16 @@ public class Interpreter implements Expr.Visitor<Object>,
         globals.define("exp", new ExpFunc());
         globals.define("ceil", new CeilFunc());
         globals.define("floor", new FloorFunc());
+        // arrays and strings
+        globals.define("all", new AllFunc());
+        globals.define("any", new AnyFunc());
+        globals.define("array", new ArrayFunc());
+        globals.define("map", new MapFunc());
+        globals.define("filter", new FilterFunc());
+        globals.define("reduce", new ReduceFunc());
+        globals.define("sort", new SortFunc());
+        globals.define("reverse", new ReverseFunc());
+
     }
 
 
@@ -140,6 +154,9 @@ public class Interpreter implements Expr.Visitor<Object>,
                 if (left instanceof JLangString && right instanceof JLangString) { // yess brother you can add strings
                     return new JLangString(((JLangString) left).getContent() + ((JLangString) right).getContent());
                 }
+                if (left instanceof JLangChar && right instanceof JLangChar){
+                    return new JLangString(String.valueOf(((JLangChar) left).getValue()) + ((JLangChar) right).getValue());
+                }
                 // This should add the adition for a string and a number like  "100" + 5 = "1005"
                 if (left instanceof JLangString) {
                     return new JLangString(((JLangString)left).getContent() + stringify(right));
@@ -168,6 +185,9 @@ public class Interpreter implements Expr.Visitor<Object>,
                 int leftIntRightShift = ((Double) left).intValue();
                 int rightIntRightShift = ((Double) right).intValue();
                 return leftIntRightShift >> rightIntRightShift;
+            case POWER:
+                checkNumberOperands(expr.operator, left, right);
+                return Math.pow((Double) left, (Double) right);
 
         }
         // Unreachable.
@@ -225,6 +245,10 @@ public class Interpreter implements Expr.Visitor<Object>,
     @Override
     public Object visitJStringExpr(Expr.JString expr) {
         return new JLangString(expr.value);
+    }
+    @Override
+    public Object visitJCharExpr(Expr.JChar expr) {
+        return new JLangChar(expr.value);
     }
 
     @Override
@@ -385,7 +409,7 @@ public class Interpreter implements Expr.Visitor<Object>,
         }
         if (array instanceof JLangString) {
             try{
-                return ((JLangString)array).getContent().charAt((int)index); 
+                return ((JLangString)array).getItem((int)index); 
             } catch (java.lang.StringIndexOutOfBoundsException e){
                 throw new RuntimeException("String of length "+ ((String)array).length()+ " index "+index+" out of bounds");
             }

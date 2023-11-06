@@ -1,6 +1,7 @@
 package interpreter.array;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -38,6 +39,11 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
         sb.append("]");
         return sb.toString();
     }
+
+    public List<Object> getElements(){
+        return elements;
+    }
+
     // Add methods for working with the array, such as get, set, length, etc.
     public int size() {
         return elements.size();
@@ -51,6 +57,24 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + elements.size());
         }
     }
+
+    @Override
+    public void sort() {
+        if(elements != null && !elements.isEmpty() && elements.get(0) instanceof Comparable) {
+            Collections.sort((List)elements);
+        } else {
+            throw new IllegalStateException("Array elements are not comparable and cannot be sorted.");
+        }
+    }
+    @Override
+    public void reverse() {
+        if(elements != null) {
+            Collections.reverse(elements);
+        } else {
+            throw new IllegalStateException("Array is null and cannot be reversed.");
+        }
+    }
+
     private void defineMethod(String name, JLangFunction function) {
         getMethods().put(name, function);
     }
@@ -362,10 +386,15 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
     }
     @Override
     public Object getItem(int index) {
+        if (index < 0) index = elements.size() + index;
         if (index >= 0 && index < elements.size()) {
             return elements.get(index);
         } else {
             throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + elements.size());
         }
+    }
+    @Override
+    public List<Object> asList() {
+        return new ArrayList<>(elements); // Return a new list to avoid external modifications
     }
 }

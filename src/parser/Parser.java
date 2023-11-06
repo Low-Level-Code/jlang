@@ -161,9 +161,9 @@ public class Parser {
         if (match(FALSE)) return new Expr.Literal(false);
         if (match(TRUE)) return new Expr.Literal(true);
         if (match(NIL)) return new Expr.Literal(null);
-        if (match(NUMBER)) {
-           return new Expr.Literal(previous().literal);
-        }if(match(STRING)){ return new Expr.JString((String)previous().literal);}
+        if (match(NUMBER)) {return new Expr.Literal(previous().literal);}
+        if(match(STRING)){ return new Expr.JString((String)previous().literal);}
+        if(match(CHARACTER)){ return new Expr.JChar((char)previous().literal);}
         if (match(SUPER)) {
             Token keyword = previous();
             consume(DOT, "Expect '.' after 'super'.");
@@ -253,7 +253,7 @@ public class Parser {
 
     private Expr term() {
         Expr expr = factor();
-        while (match(MINUS, PLUS, SHIFT_LEFT, SHIFT_RIGHT)) {
+        while (match(MINUS, PLUS, SHIFT_LEFT, SHIFT_RIGHT, POWER)) {
             Token operator = previous();
             Expr right = factor();
             expr = new Expr.Binary(expr, operator, right);

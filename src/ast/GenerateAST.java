@@ -79,6 +79,7 @@ public class GenerateAST {
             "Literal : Object value",
             "Array : List<Expr> elements",
             "JString : String value",
+            "JChar : char value",
             "ArrayAccess : Expr name, Expr index",
             "Logical : Expr left, Token operator, Expr right",
             "Set : Expr object, Token name, Expr value",

@@ -13,6 +13,7 @@ public abstract class Expr {
 		R visitLiteralExpr(Literal expr);
 		R visitArrayExpr(Array expr);
 		R visitJStringExpr(JString expr);
+		R visitJCharExpr(JChar expr);
 		R visitArrayAccessExpr(ArrayAccess expr);
 		R visitLogicalExpr(Logical expr);
 		R visitSetExpr(Set expr);
@@ -137,6 +138,18 @@ public abstract class Expr {
 		}
 
 		public final String value;
+	}
+	public static class JChar extends Expr {
+		public JChar(char value) {
+			this.value = value;
+		}
+
+		@Override
+		public <R> R accept(Visitor<R> visitor) {
+			return visitor.visitJCharExpr(this);
+		}
+
+		public final char value;
 	}
 	public static class ArrayAccess extends Expr {
 		public ArrayAccess(Expr name, Expr index) {

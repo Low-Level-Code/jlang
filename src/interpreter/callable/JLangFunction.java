@@ -31,7 +31,7 @@ public class JLangFunction implements JLangCallable{
     }
     @Override
     public int arity() {
-        return declaration.params.size();
+        return this.declaration == null ? 0 :declaration.params.size();
     }
     @Override
     public String toString() {

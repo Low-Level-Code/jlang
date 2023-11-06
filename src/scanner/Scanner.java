@@ -71,6 +71,28 @@ public class Scanner {
         if (isAtEnd()) return '\0';
         return source.charAt(current);
     }
+    private void character() {
+        // If we're at the end after the opening quote, it's an error.
+        if (isAtEnd()) {
+            JLang.error(line, "Unterminated character literal.");
+            return;
+        }
+    
+        // Get the character value.
+        char value = advance();
+        // Now we check for the closing quote.
+        if (isAtEnd()) {
+            JLang.error(line, "Unterminated character literal.");
+            return;
+        }
+        if (advance() != '\'') {
+            JLang.error(line, "Unterminated character literal.");
+            return;
+        }
+    
+        // At this point, we've found a valid character literal.
+        addToken(CHARACTER, value);
+    }
     private void string() {
         while (peek() != '"' && !isAtEnd()) {
             if (peek() == '\n') line++;
@@ -136,7 +158,7 @@ public class Scanner {
             case '-':addToken(match('-') ? DECREMENT : (match('=') ? MINUS_EQUAL : MINUS));break;
             case '+':addToken(match('+') ? INCREMENT : (match('=') ? PLUS_EQUAL : PLUS ));break;
             case ';':addToken(SEMICOLON);break;
-            case '*':addToken(match('=') ? STAR_EQUAL:STAR);break;
+            case '*':addToken(match('=') ? STAR_EQUAL: (match('*') ? POWER : STAR));break;
             case '!':addToken(match('=') ? BANG_EQUAL : BANG);break;
             case '?':addToken(QUESTION_MARK);break; // fot the tenary operation
             case ':':addToken(COLON);break; // fot the tenary operation
@@ -160,6 +182,7 @@ public class Scanner {
                 line++;
                 break;
             case '"': string(); break;
+            case '\'':character();break;
             default:
                 if (isDigit(c)) {
                     number();
