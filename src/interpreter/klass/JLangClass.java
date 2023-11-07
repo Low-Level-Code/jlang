@@ -1,5 +1,7 @@
 package interpreter.klass;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,10 +16,18 @@ public class JLangClass implements JLangCallable {
     public static final String CLASS_INNER_INSTANCE_NAME = "this";
     public static final String CLASS_SUPER_INSTANCE_NAME = "super";
     
+
+    public JLangClass(String name) {
+        this.name = name;
+        this.methods = new HashMap<String, JLangFunction>();
+        this.superclasses = new ArrayList<JLangClass>();
+        defineBuiltInMethods();
+    }
     public JLangClass(String name, List<JLangClass> superclasses, Map<String, JLangFunction> methods) {
         this.name = name;
         this.methods = methods;
         this.superclasses = superclasses; // Now stores a list of superclasses
+        defineBuiltInMethods();
     }
 
     public JLangFunction findMethod(String name) {
@@ -58,6 +68,10 @@ public class JLangClass implements JLangCallable {
     }
     
     public Map<String, JLangFunction> getMethods() { return methods; }
+    
+    protected void defineBuiltInMethods() {
+        // Define common methods for all JLangClasses here, if any
+    }
 
 }
 

@@ -166,3 +166,7 @@ reverse(arr);
 reverse(str);
 print(arr);
 print(str);
+var a = 'a';
+print(type(a));
+print(methods(a));
+print(a.isDigit());

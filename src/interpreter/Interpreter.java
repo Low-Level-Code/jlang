@@ -44,6 +44,8 @@ public class Interpreter implements Expr.Visitor<Object>,
     private Environment environment = globals;
     private final Map<Expr, Integer> locals = new HashMap<>();
     public Interpreter() {
+        // utils
+        globals.define("methods", new MethodsFunc());
         globals.define("clock", new ClockFun());
         globals.define("min", new MinFunc());
         globals.define("max", new MaxFunc());

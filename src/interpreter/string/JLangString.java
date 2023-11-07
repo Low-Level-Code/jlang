@@ -19,10 +19,8 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
     private String content;
     
     public JLangString(String content) {
-        super("JLangString", new ArrayList<JLangClass>(), new HashMap<String, JLangFunction>());
-        this.content = content;
-         defineBuiltInMethods();
-
+        super("JLangString");
+        this.content = content; 
     }
 
     @Override
@@ -50,11 +48,9 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         this.content = new StringBuilder(this.content).reverse().toString();
     }
 
-    private void defineMethod(String name, JLangFunction function) {
-        getMethods().put(name, function);
-    }
-    private void defineBuiltInMethods() {
-        defineMethod("size", new JLangFunction(null, null, false) {
+    @Override
+    protected void defineBuiltInMethods() {
+        methods.put("size", new JLangFunction(null, null, false) {
             @Override
             public int arity() {
                 return 0; // size doesn't take any parameters
@@ -66,7 +62,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
             }
         });
 
-        defineMethod("get", new JLangFunction(null, null, false) {
+        methods.put("get", new JLangFunction(null, null, false) {
             @Override
             public int arity() {
                 return 1; // get takes one parameter
@@ -81,7 +77,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
          // Check if the string contains a certain substring
-        defineMethod("contains", new JLangFunction(null, null, false) {
+        methods.put("contains", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
 
@@ -93,7 +89,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
         // Convert the string to uppercase
-        defineMethod("toUpperCase", new JLangFunction(null, null, false) {
+        methods.put("toUpperCase", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 0; }
 
@@ -104,7 +100,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
         // Convert the string to lowercase
-        defineMethod("toLowerCase", new JLangFunction(null, null, false) {
+        methods.put("toLowerCase", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 0; }
 
@@ -115,7 +111,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
         // Check if the string starts with a certain substring
-        defineMethod("startsWith", new JLangFunction(null, null, false) {
+        methods.put("startsWith", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
 
@@ -127,7 +123,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
         // Check if the string ends with a certain substring
-        defineMethod("endsWith", new JLangFunction(null, null, false) {
+        methods.put("endsWith", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
 
@@ -139,7 +135,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
         // Replace a part of the string with another string
-        defineMethod("replace", new JLangFunction(null, null, false) {
+        methods.put("replace", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 2; }
 
@@ -152,7 +148,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
         // Trim whitespace from the beginning and end of the string
-        defineMethod("trim", new JLangFunction(null, null, false) {
+        methods.put("trim", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 0; }
 
@@ -163,7 +159,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
         // Substring between two indices
-        defineMethod("substring", new JLangFunction(null, null, false) {
+        methods.put("substring", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 2; }
 
@@ -176,7 +172,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
         // Return the index of the first occurrence of a specified substring
-        defineMethod("indexOf", new JLangFunction(null, null, false) {
+        methods.put("indexOf", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
 
@@ -188,7 +184,7 @@ public class JLangString extends JLangClass  implements JLangObject, JLangIndexi
         });
 
         // Return a string repeated a certain number of times
-        defineMethod("repeat", new JLangFunction(null, null, false) {
+        methods.put("repeat", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
 

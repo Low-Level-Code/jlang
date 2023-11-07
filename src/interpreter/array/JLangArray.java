@@ -19,9 +19,8 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
     private final List<Object> elements;
 
     public JLangArray(List<Object> elements) {
-        super("JLangArray", new ArrayList<JLangClass>(), new HashMap<String, JLangFunction>());
+        super("JLangArray");
         this.elements = elements;
-        defineBuiltInMethods();
     }
 
     @Override
@@ -75,11 +74,11 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
         }
     }
 
-    private void defineMethod(String name, JLangFunction function) {
-        getMethods().put(name, function);
-    }
-    private void defineBuiltInMethods() {
-        defineMethod("size", new JLangFunction(null, null, false) {
+    
+    @Override
+    protected void defineBuiltInMethods() {
+        System.out.println("Defined array built-ins");
+        methods.put("size", new JLangFunction(null, null, false) {
             @Override
             public int arity() {
                 return 0; // size doesn't take any parameters
@@ -91,7 +90,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("get", new JLangFunction(null, null, false) {
+        methods.put("get", new JLangFunction(null, null, false) {
             @Override
             public int arity() {
                 return 1; // get takes one parameter
@@ -105,7 +104,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("set", new JLangFunction(null, null, false) {
+        methods.put("set", new JLangFunction(null, null, false) {
             @Override
             public int arity() {
                 return 2; // set takes two parameters
@@ -121,7 +120,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("add", new JLangFunction(null, null, false) {
+        methods.put("add", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
     
@@ -132,7 +131,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
     
-        defineMethod("insert", new JLangFunction(null, null, false) {
+        methods.put("insert", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 2; }
     
@@ -145,7 +144,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
         
-        defineMethod("removeAt", new JLangFunction(null, null, false) {
+        methods.put("removeAt", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
 
@@ -160,7 +159,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("contains", new JLangFunction(null, null, false) {
+        methods.put("contains", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
     
@@ -170,7 +169,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("indexOf", new JLangFunction(null, null, false) {
+        methods.put("indexOf", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
     
@@ -180,7 +179,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("clear", new JLangFunction(null, null, false) {
+        methods.put("clear", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 0; }
     
@@ -191,7 +190,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("isEmpty", new JLangFunction(null, null, false) {
+        methods.put("isEmpty", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 0; }
     
@@ -201,7 +200,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("toArray", new JLangFunction(null, null, false) {
+        methods.put("toArray", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 0; }
     
@@ -211,7 +210,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("forEach", new JLangFunction(null, null, false) {
+        methods.put("forEach", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; }
         
@@ -226,7 +225,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("filter", new JLangFunction(null, null, false) {
+        methods.put("filter", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; } // filter takes a single function as an argument
         
@@ -256,7 +255,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("map", new JLangFunction(null, null, false) {
+        methods.put("map", new JLangFunction(null, null, false) {
             @Override
             public int arity() { return 1; } // map takes a single function as an argument
         
@@ -284,7 +283,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
 
-        defineMethod("sort", new JLangFunction(null, null, false) {
+        methods.put("sort", new JLangFunction(null, null, false) {
             @Override
             public int arity() {
                 return 0; // 'sort' can be called without a comparator for default behavior
@@ -304,7 +303,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
         
-        defineMethod("sortWithComparator", new JLangFunction(null, null, false) {
+        methods.put("sortWithComparator", new JLangFunction(null, null, false) {
             @Override
             public int arity() {
                 return 1; // 'sortWithComparator' takes one parameter
@@ -334,7 +333,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
             }
         });
         
-        defineMethod("reverse", new JLangFunction(null, null, false) {
+        methods.put("reverse", new JLangFunction(null, null, false) {
             @Override
             public int arity() {
                 return 0; // 'reverse' does not take any parameters
@@ -347,7 +346,7 @@ public class JLangArray extends JLangClass  implements JLangObject, JLangIndexib
                 return new JLangArray(reversedElements);
             }
         });
-        defineMethod("reduce", new JLangFunction(null, null, false) {
+        methods.put("reduce", new JLangFunction(null, null, false) {
             @Override
             public int arity() {
                 return 2; // reduce takes two parameters: the reducer function and the initial value

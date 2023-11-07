@@ -15,29 +15,47 @@ public class JLangChar extends JLangClass implements JLangObject {
     private final char value;
 
     public JLangChar(char value) {
-        super("JLangChar", null, new HashMap<>());
+        super("JLangChar");
         this.value = value;
         defineBuiltInMethods();
     }
+    
+    @Override
+    protected void defineBuiltInMethods() {
+        // Define JLangChar-specific methods
 
-    private void defineBuiltInMethods() {
-
-        // Define methods like isDigit, isLetter, toUpperCase, etc.
-        defineMethod("isDigit", new JLangFunction(null, null, false) {
+        methods.put("isDigit", new JLangFunction(null, null, false) {
             @Override
-            public int arity() { return 0; }
-
+            public int arity() {
+                return 0;
+            }
+        
+            @Override
+            public String toString() {
+                return "<native fn isDigit>";
+            }
             @Override
             public Object call(Interpreter interpreter, List<Object> arguments) {
-                return Character.isDigit(value);
+                return Character.isDigit(JLangChar.this.value);
             }
         });
-        
-        // Other methods can be defined in a similar way.
-    }
 
-    private void defineMethod(String name, JLangFunction function) {
-        getMethods().put(name, function);
+        methods.put("toUpperCase", new JLangFunction(null, null, false) {
+            @Override
+            public int arity() {
+                return 0;
+            }
+            @Override
+            public String toString() {
+                return "<native fn toUpperCase>";
+            }
+            @Override
+            public Object call(Interpreter interpreter, List<Object> arguments) {
+                return Character.toUpperCase(JLangChar.this.value);
+            }
+        });
+
+        // Add other char-specific methods similarly
     }
 
     @Override
